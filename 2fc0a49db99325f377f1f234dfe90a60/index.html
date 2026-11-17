@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <!-- rev: redistribuir-2026-11-17c -->
+  <!-- rev: redistribuir-2026-11-17d -->
   <meta charset="UTF-8" />
   <meta name="robots" content="noindex,nofollow" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><circle cx=%2212%22 cy=%2212%22 r=%2210%22 fill=%22%230A3D2E%22/><circle cx=%2212%22 cy=%2212%22 r=%225%22 fill=%22%23F5B731%22/></svg>" />
@@ -375,14 +375,28 @@
       .rd-cards { display: block; }
       .pedido .assinaturas { grid-template-columns: 1fr; }
     }
+    #print-root {
+      position: absolute; left: -10000px; top: 0; width: 210mm;
+      background: #fff; color: #102820; padding: 0; margin: 0; z-index: -1;
+    }
+    body.print-mode .shell,
+    body.print-mode .modal-bg { display: none !important; }
+    body.print-mode #print-root {
+      position: static; left: auto; z-index: 1;
+      width: auto; max-width: 210mm; margin: 0 auto; padding: 16px;
+    }
     @media print {
-      body { background: #fff; }
-      .shell, .modal-bg { display: none !important; }
-      .pedido-print {
-        display: block !important; position: static; background: #fff;
-        box-shadow: none; max-width: none; padding: 0; margin: 0; border-radius: 0;
+      html, body { background: #fff !important; margin: 0 !important; }
+      .shell, .modal-bg, .no-print, .pedido-actions { display: none !important; }
+      #print-root {
+        display: block !important; position: static !important;
+        left: auto !important; top: auto !important; z-index: 1 !important;
+        width: auto !important; max-width: none !important;
+        padding: 0 !important; margin: 0 !important;
+        background: #fff !important; color: #102820 !important;
+        box-shadow: none !important;
       }
-      .pedido-actions { display: none !important; }
+      #print-root * { visibility: visible !important; }
     }
   </style>
 </head>
@@ -574,6 +588,7 @@
             <p class="rd-tip">Depois do envio: o app confere na próxima fatura se a nova divisão foi aplicada.</p>
             <div class="pedido-actions">
               <button type="button" class="btn accent" id="pedido-print">Imprimir / salvar PDF</button>
+              <button type="button" class="btn secondary" id="pedido-baixar">Baixar PDF</button>
               <button type="button" class="btn ghost" id="pedido-fechar">Fechar</button>
             </div>
           </div>
@@ -757,6 +772,7 @@
       </main>
     </div>
   </div>
+  <div id="print-root" hidden></div>
   <script>
     if (new URLSearchParams(location.search).has("full")) document.documentElement.classList.add("fullshot");
     if (new URLSearchParams(location.search).has("shot")) document.documentElement.classList.add("shot");
@@ -962,7 +978,227 @@
       return ok;
     }
 
-    function abrirPedido() {
+
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+        return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+      });
+    }
+    function dataHoje() {
+      const d = new Date();
+      return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
+    }
+    function pedidoCampos() {
+      const dataEl = document.getElementById("pedido-data");
+      if (dataEl && !dataEl.value) dataEl.value = dataHoje();
+      return {
+        titular: ((document.getElementById("pedido-titular") || {}).value || "").trim(),
+        cpf: ((document.getElementById("pedido-cpf") || {}).value || "").trim(),
+        email: ((document.getElementById("pedido-email") || {}).value || "").trim(),
+        data: ((document.getElementById("pedido-data") || {}).value || "").trim() || dataHoje()
+      };
+    }
+    function pedidoFolhaCSS() {
+      return [
+        "*{box-sizing:border-box}",
+        "html,body{margin:0;padding:0;background:#fff;color:#102820;}",
+        "body{font-family:'Segoe UI',system-ui,Roboto,Arial,sans-serif;font-size:12pt;line-height:1.5;}",
+        ".folha{max-width:190mm;margin:0 auto;padding:0;color:#102820;background:#fff;}",
+        ".folha h1{font-size:15pt;line-height:1.25;margin:0 0 2px;font-weight:700;}",
+        ".folha .sub{font-size:10pt;color:#444;margin:0 0 8px;}",
+        ".folha .aviso{border:1px solid #c9a227;background:#fff8e6;padding:7px 10px;margin:0 0 10px;font-size:9.5pt;}",
+        ".folha .intro,.folha .fecha{margin:0 0 10px;}",
+        ".folha h2{font-size:12pt;margin:10px 0 4px;color:#0a3d2e;}",
+        ".folha .meta{font-size:10pt;color:#555;margin:0 0 6px;}",
+        ".folha table{width:100%;border-collapse:collapse;margin:0 0 6px;font-size:11pt;}",
+        ".folha th,.folha td{text-align:left;padding:3px 6px;border-bottom:1px solid #c5c5c5;}",
+        ".folha th{font-size:8.5pt;text-transform:uppercase;letter-spacing:.4px;color:#555;}",
+        ".folha tfoot th,.folha tfoot td{font-weight:700;border-bottom:0;padding-top:6px;text-transform:none;}",
+        ".campos{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;margin:4px 0 8px;}",
+        ".campos .cheio{grid-column:1/-1;}",
+        ".campo label{display:block;font-size:9pt;color:#555;margin:0 0 2px;}",
+        ".campo .valor,.campo .linha{border-bottom:1px solid #222;min-height:22px;padding:2px 0;font-size:11pt;}",
+        ".ajuda{font-size:9pt;color:#555;margin:4px 0 0;}",
+        ".bloco-titular{page-break-inside:avoid;}",
+        ".toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px;background:#f4f8f5;border-bottom:1px solid #d4e3da;margin-bottom:16px;}",
+        ".toolbar button{font:inherit;font-size:14px;font-weight:600;padding:8px 14px;border-radius:8px;border:1px solid #0a3d2e;background:#0a3d2e;color:#fff;cursor:pointer;}",
+        ".toolbar button.sec{background:#fff;color:#0a3d2e;}",
+        ".toolbar p{margin:0;font-size:12px;color:#5f7369;flex:1 1 16rem;}",
+        "@page{size:A4;margin:14mm;}",
+        "@media print{html,body{background:#fff;} .toolbar,.no-print{display:none !important;} .folha{max-width:none;padding:0;}}"
+      ].join("");
+    }
+    function pedidoTabelasHTML() {
+      return PLANTAS.map(function (p) {
+        const aloc = UNITS.filter(function (u) { return (state[p.key][u.id] || 0) > 0; });
+        const rows = aloc.map(function (u) {
+          return "<tr><td>" + esc(u.name) + "</td><td>" + br(state[p.key][u.id], 0) + "%</td><td>" + br(p.pool * state[p.key][u.id] / 100, 1) + " kWh</td></tr>";
+        }).join("");
+        const soma = aloc.reduce(function (s, u) { return s + (state[p.key][u.id] || 0); }, 0);
+        const kwh = aloc.reduce(function (s, u) { return s + p.pool * (state[p.key][u.id] || 0) / 100; }, 0);
+        return "<h2>" + esc(p.nome) + "</h2>"
+          + "<p class=\"meta\">Energia de referência deste pedido: " + br(p.pool, 0) + " kWh (ciclo de novembro/2026).</p>"
+          + "<table><thead><tr><th>Unidade beneficiária</th><th>Percentual do rateio</th><th>Energia correspondente</th></tr></thead>"
+          + "<tbody>" + rows + "</tbody>"
+          + "<tfoot><tr><th>Total</th><th>" + br(soma, 0) + "%</th><th>" + br(kwh, 1) + " kWh</th></tr></tfoot></table>";
+      }).join("");
+    }
+    function campoLinha(rotulo, valor, cheio) {
+      const v = (valor || "").trim();
+      return "<div class=\"campo" + (cheio ? " cheio" : "") + "\"><label>" + rotulo + "</label>"
+        + (v ? "<div class=\"valor\">" + esc(v) + "</div>" : "<div class=\"linha\"></div>")
+        + "</div>";
+    }
+    function pedidoFolhaHTML(campos) {
+      const c = campos || pedidoCampos();
+      return '<article class="folha" id="pedido-folha">'
+        + "<h1>Solicitação de alteração de rateio (Lei nº 14.300/2022)</h1>"
+        + '<p class="sub">Geração distribuída compartilhada · Equatorial Energia</p>'
+        + '<p class="aviso"><strong>Simulação</strong> — o envio é feito pelo titular da usina na Agência Virtual Equatorial; a alteração passa a valer em até 30 dias. Este documento não substitui o pedido oficial e não deve ser encaminhado com dados de terceiros.</p>'
+        + '<p class="intro">O titular abaixo identificado solicita à Equatorial Energia a alteração dos percentuais de rateio da energia injetada pelas unidades geradoras indicadas, nos termos da Lei nº 14.300, de 6 de janeiro de 2022, e da regulamentação aplicável da ANEEL. Os percentuais de cada usina somam 100%.</p>'
+        + pedidoTabelasHTML()
+        + '<section class="bloco-titular">'
+        + "<h2>Dados do titular</h2>"
+        + '<div class="campos">'
+        + campoLinha("Nome do titular", c.titular, false)
+        + campoLinha("CPF ou CNPJ do titular", c.cpf, false)
+        + campoLinha("E-mail do titular para contato", c.email, true)
+        + "</div>"
+        + '<p class="ajuda">Preencha com o e-mail do titular já cadastrado na Agência Virtual Equatorial. O campo permanece em branco até o preenchimento pelo titular.</p>'
+        + '<div class="campos">'
+        + campoLinha("Data", c.data, false)
+        + campoLinha("Assinatura do titular", "", false)
+        + "</div>"
+        + '<p class="fecha">Declaro que os percentuais acima somam 100% em cada unidade geradora e que os dados do titular serão preenchidos antes do envio na Agência Virtual Equatorial.</p>'
+        + "</section>"
+        + "</article>";
+    }
+    function pedidoPaginaCompleta(campos, opts) {
+      opts = opts || {};
+      const auto = opts.autoprint ? "true" : "false";
+      const toolbar = opts.toolbar === false ? "" : (
+        '<div class="toolbar no-print">'
+        + '<button type="button" id="btn-imprimir">Imprimir / salvar PDF</button>'
+        + '<button type="button" class="sec" id="btn-baixar">Baixar PDF</button>'
+        + "<p>No computador, na caixa de impressão escolha “Salvar como PDF”. No celular, use Baixar PDF.</p>"
+        + "</div>"
+      );
+      const boot = "<script>(" + String(bootImpressao) + ")(" + auto + ");<\/script>";
+      return "<!DOCTYPE html><html lang=\"pt-BR\"><head><meta charset=\"UTF-8\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+        + "<title>Solicitação de alteração de rateio (Lei nº 14.300/2022)</title>"
+        + "<style>" + pedidoFolhaCSS() + "</style></head><body>"
+        + toolbar + pedidoFolhaHTML(campos) + boot + "</body></html>";
+    }
+    function bootImpressao(autoprint) {
+      function load(cb) {
+        if (window.html2pdf) return cb();
+        var urls = [
+          "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js",
+          "https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"
+        ];
+        var i = 0;
+        var next = function () {
+          if (i >= urls.length) { cb(new Error("cdn")); return; }
+          var s = document.createElement("script");
+          s.src = urls[i++];
+          s.onload = function () { window.html2pdf ? cb() : next(); };
+          s.onerror = next;
+          document.head.appendChild(s);
+        };
+        next();
+      }
+      function baixar() {
+        var el = document.getElementById("pedido-folha");
+        load(function (err) {
+          if (err || !window.html2pdf) { window.print(); return; }
+          window.html2pdf().set({
+            margin: [12, 12, 12, 12],
+            filename: "solicitacao-alteracao-rateio.pdf",
+            image: { type: "jpeg", quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+            pagebreak: { mode: ["css", "legacy"] }
+          }).from(el).save();
+        });
+      }
+      var bi = document.getElementById("btn-imprimir");
+      var bb = document.getElementById("btn-baixar");
+      if (bi) bi.addEventListener("click", function () { window.print(); });
+      if (bb) bb.addEventListener("click", baixar);
+      if (autoprint) {
+        var go = function () { setTimeout(function () { window.print(); }, 400); };
+        if (document.readyState === "complete") go();
+        else window.addEventListener("load", go);
+      }
+    }
+    function prepararPrintRoot(campos) {
+      const root = document.getElementById("print-root");
+      root.hidden = false;
+      root.innerHTML = '<style>' + pedidoFolhaCSS() + "</style>" + pedidoFolhaHTML(campos || pedidoCampos());
+      return root;
+    }
+    function abrirPaginaImpressao(autoprint) {
+      if (!validarEmailTitular()) {
+        const email = document.getElementById("pedido-email");
+        if (email) email.focus();
+        return null;
+      }
+      const campos = pedidoCampos();
+      prepararPrintRoot(campos);
+      const html = pedidoPaginaCompleta(campos, { autoprint: !!autoprint });
+      const w = window.open("", "_blank");
+      if (!w) {
+        if (autoprint) window.print();
+        return null;
+      }
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+      try { w.focus(); } catch (err) {}
+      return w;
+    }
+    function carregarHtml2Pdf() {
+      if (window.html2pdf) return Promise.resolve(window.html2pdf);
+      const urls = [
+        "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js",
+        "https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"
+      ];
+      return new Promise(function (resolve, reject) {
+        const tryNext = function (i) {
+          if (i >= urls.length) return reject(new Error("Não foi possível carregar o gerador de PDF."));
+          const s = document.createElement("script");
+          s.src = urls[i];
+          s.onload = function () { window.html2pdf ? resolve(window.html2pdf) : tryNext(i + 1); };
+          s.onerror = function () { tryNext(i + 1); };
+          document.head.appendChild(s);
+        };
+        tryNext(0);
+      });
+    }
+    function baixarPedidoPdf() {
+      if (!validarEmailTitular()) {
+        const email = document.getElementById("pedido-email");
+        if (email) email.focus();
+        return Promise.resolve(false);
+      }
+      const campos = pedidoCampos();
+      const root = prepararPrintRoot(campos);
+      const el = root.querySelector("#pedido-folha") || root;
+      return carregarHtml2Pdf().then(function (html2pdf) {
+        return html2pdf().set({
+          margin: [12, 12, 12, 12],
+          filename: "solicitacao-alteracao-rateio.pdf",
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+          pagebreak: { mode: ["css", "legacy"] }
+        }).from(el).save();
+      }).catch(function () {
+        abrirPaginaImpressao(true);
+      });
+    }
+
+        function abrirPedido() {
       if (!totalsOk()) return;
       document.getElementById("pedido-corpo").innerHTML = pedidoHTML();
       const data = document.getElementById("pedido-data");
@@ -998,13 +1234,10 @@
       document.getElementById("pedido-email").addEventListener("input", validarEmailTitular);
       document.getElementById("pedido-email").addEventListener("blur", validarEmailTitular);
       document.getElementById("pedido-print").addEventListener("click", () => {
-        if (!validarEmailTitular()) {
-          document.getElementById("pedido-email").focus();
-          return;
-        }
-        document.getElementById("pedido-doc").classList.add("pedido-print");
-        window.print();
-        document.getElementById("pedido-doc").classList.remove("pedido-print");
+        abrirPaginaImpressao(true);
+      });
+      document.getElementById("pedido-baixar").addEventListener("click", () => {
+        baixarPedidoPdf();
       });
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") fecharPedido();
@@ -1066,6 +1299,16 @@
       ok(document.getElementById("pedido-titular").value === "" && document.getElementById("pedido-cpf").value === "", "nome e CPF/CNPJ ficam em branco");
       fecharPedido();
 
+      const root = prepararPrintRoot(pedidoCampos());
+      ok(root.parentElement === document.body, "a folha de impressão é filha direta do body (não fica dentro do modal)");
+      const folha = root.innerText;
+      ok(folha.indexOf("Lei nº 14.300/2022") >= 0 && folha.indexOf("Usina 15 kWp") >= 0 && folha.indexOf("Casa 01 Coletivo") >= 0, "folha de impressão tem cabeçalho e as duas usinas");
+      ok(folha.indexOf("100%") >= 0 && folha.indexOf("kWh") >= 0, "folha de impressão tem percentuais e kWh");
+      ok(folha.indexOf("E-mail do titular para contato") >= 0 && folha.indexOf("CPF ou CNPJ") >= 0 && folha.indexOf("Assinatura do titular") >= 0, "folha tem campos em branco do titular");
+      const pagina = pedidoPaginaCompleta(pedidoCampos(), { autoprint: false });
+      ok(pagina.indexOf("<!DOCTYPE html>") === 0 && pagina.indexOf("@media print") >= 0, "a página avulsa de impressão é um HTML completo com CSS de print");
+      ok(pagina.indexOf("class=\"shell\"") < 0 && pagina.indexOf("modal-bg") < 0, "a página avulsa não inclui o painel nem o modal");
+
       const out = document.getElementById("test-out");
       out.hidden = false;
       out.classList.add("show");
@@ -1075,7 +1318,13 @@
     renderPlantas();
     bind();
     renderTotalsAndPreview();
-    if (new URLSearchParams(location.search).has("test")) runTests();
+    const params = new URLSearchParams(location.search);
+    if (params.has("test")) runTests();
+    if (params.has("printpedido")) {
+      prepararPrintRoot(pedidoCampos());
+      document.body.classList.add("print-mode");
+      document.title = "Solicitação de alteração de rateio (Lei nº 14.300/2022)";
+    }
 
   </script>
 </body>
