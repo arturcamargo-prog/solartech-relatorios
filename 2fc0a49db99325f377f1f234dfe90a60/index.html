@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <!-- rev: redistribuir-2026-11-17 -->
   <meta charset="UTF-8" />
   <meta name="robots" content="noindex,nofollow" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><circle cx=%2212%22 cy=%2212%22 r=%2210%22 fill=%22%230A3D2E%22/><circle cx=%2212%22 cy=%2212%22 r=%225%22 fill=%22%23F5B731%22/></svg>" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Usinas e créditos — Simulação novembro/2026 · SolarTech</title>
   <style>
@@ -138,53 +140,6 @@
     .sim-banner span { font-weight: 500; color: var(--text); }
 
 
-    .arvore-lead { margin: -4px 0 14px; color: var(--muted); font-size: 14px; }
-    .arvore-desktop { padding: 8px 8px 4px; overflow: hidden; }
-    .arvore-desktop svg { width: 100%; height: auto; display: block; }
-    .arvore-mobile { display: none; }
-    .arv-grupo {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden;
-    }
-    .arv-grupo summary {
-      display: flex; align-items: center; gap: 12px; cursor: pointer;
-      background: var(--primary); color: #fff; padding: 14px 16px; list-style: none;
-    }
-    .arv-grupo summary::-webkit-details-marker, .arv-grupo summary::marker { display: none; }
-    .arv-grupo summary .who { flex: 1; min-width: 0; }
-    .arv-grupo summary strong { display: block; font-size: 16px; font-weight: 800; }
-    .arv-grupo summary em { display: block; font-style: normal; font-weight: 600; color: var(--accent); font-size: 13px; margin-top: 2px; }
-    .arv-grupo summary .chev { margin-left: auto; transition: transform 0.15s; }
-    .arv-grupo[open] summary .chev { transform: rotate(180deg); }
-    .arv-lista { list-style: none; margin: 0; padding: 12px 14px 8px; }
-    .arv-filho { margin: 0 0 12px; padding: 0 0 12px; border-bottom: 1px solid var(--bg-alt); }
-    .arv-filho:last-child { border-bottom: 0; margin-bottom: 0; }
-    .arv-ramo-row { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
-    .arv-ramo {
-      flex: 1; height: 10px; background: var(--bg-alt); border-radius: 999px; min-width: 0;
-    }
-    .arv-ramo > i {
-      display: block; height: 10px; border-radius: 999px; background: var(--primary-soft);
-      min-width: 18px;
-    }
-    .arv-ramo-row > span {
-      font-size: 12px; font-weight: 700; color: var(--primary); white-space: nowrap;
-    }
-    .arv-card { border-radius: var(--radius); padding: 10px 12px; }
-    .arv-card.ok { background: var(--success-soft); }
-    .arv-card.sobra { background: var(--accent-soft); }
-    .arv-card.falta { background: var(--danger-soft); }
-    .arv-card .nm { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; }
-    .arv-card .st { font-size: 12px; font-weight: 700; margin: 2px 0 4px; }
-    .arv-card.ok .st { color: var(--success); }
-    .arv-card.sobra .st { color: var(--warning); }
-    .arv-card.falta .st { color: var(--danger); }
-    .arv-card p { margin: 0; font-size: 13.5px; }
-    @media (max-width: 800px) {
-      .arvore-desktop { display: none; }
-      .arvore-mobile { display: block; }
-    }
-
     .resumo p { margin: 0 0 10px; font-size: 16px; line-height: 1.55; }
     .resumo p:last-child { margin-bottom: 0; }
 
@@ -275,6 +230,145 @@
       content: ""; width: 8px; height: 18px; border-radius: 2px; background: var(--accent); display: block;
     }
     .note { font-size: 12px; color: var(--muted); margin-top: 16px; }
+
+    /* Redistribuir energia */
+    .rd-lead { margin: -4px 0 14px; color: var(--muted); font-size: 14px; max-width: 68ch; }
+    .rd-plantas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .rd-planta { padding: 0; overflow: hidden; }
+    .rd-planta > header {
+      background: var(--primary); color: #fff; padding: 12px 16px;
+      display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .rd-planta > header strong { font-size: 15px; font-weight: 700; }
+    .rd-planta > header span { font-size: 13px; color: var(--accent); font-weight: 600; }
+    .rd-total {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      margin: 0; padding: 8px 16px; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border);
+    }
+    .rd-total.ok { background: var(--success-soft); color: var(--success); }
+    .rd-total.bad { background: var(--danger-soft); color: var(--danger); }
+    .rd-rows { padding: 6px 12px 10px; }
+    .rd-row {
+      display: grid;
+      grid-template-columns: minmax(7.5rem, 1.2fr) 28px 1fr 28px 5.6rem;
+      gap: 8px; align-items: center; padding: 7px 4px;
+      border-bottom: 1px solid var(--bg-alt);
+    }
+    .rd-pct { display: flex; align-items: center; gap: 3px; min-width: 0; }
+    .rd-pct input[type="number"] { flex: 1; min-width: 0; }
+    .rd-pct .pct { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .rd-row input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+    .rd-row input[type="number"]::-webkit-outer-spin-button,
+    .rd-row input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .rd-row:last-child { border-bottom: 0; }
+    .rd-row .nm { font-size: 14px; font-weight: 600; line-height: 1.3; }
+    .rd-step {
+      width: 28px; height: 28px; padding: 0; border: 1px solid var(--border); background: var(--surface);
+      border-radius: 8px; color: var(--primary); font-size: 16px; line-height: 1; cursor: pointer;
+      display: grid; place-items: center;
+    }
+    .rd-step:hover { background: var(--bg-alt); }
+    .rd-row input[type="range"] {
+      width: 100%; height: 28px; margin: 0; accent-color: var(--primary-soft); cursor: pointer;
+    }
+    .rd-row input[type="number"] {
+      width: 100%; height: 28px; border: 1px solid var(--border); border-radius: 8px;
+      padding: 0 6px; text-align: right; font-size: 14px; font-variant-numeric: tabular-nums;
+      background: var(--surface);
+    }
+    .rd-row input[type="number"]:focus, .rd-step:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .rd-preview { margin-bottom: 16px; }
+    .rd-preview h3 { font-size: 15px; font-weight: 700; margin: 0 0 4px; }
+    .rd-tip { font-size: 12px; color: var(--muted); margin: 0 0 12px; }
+    .rd-table-wrap { overflow-x: auto; }
+    table.rd-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .rd-table th {
+      text-align: left; font-size: 11px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 10px;
+      border-bottom: 1px solid var(--border); background: #fafcfb; white-space: nowrap;
+    }
+    .rd-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .rd-table tr:last-child td { border-bottom: 0; }
+    .rd-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .rd-table tr.ok td { background: var(--success-soft); }
+    .rd-table tr.sobra td { background: var(--accent-soft); }
+    .rd-table tr.falta td { background: var(--danger-soft); }
+    .rd-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+    .rd-after {
+      border-radius: var(--radius); padding: 12px 14px; font-size: 13px;
+      background: var(--primary-light); color: var(--primary);
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .rd-after strong { font-weight: 700; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 8px 14px; border-radius: 10px; border: 1px solid transparent; cursor: pointer;
+      font-weight: 600; font-size: 14px; white-space: nowrap; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn.primary { background: var(--primary); color: #fff; }
+    .btn.primary:hover:not(:disabled) { background: #0e4d3a; }
+    .btn.secondary { background: var(--primary-light); color: var(--primary); }
+    .btn.secondary:hover:not(:disabled) { background: #c9e4d8; }
+    .btn.ghost { background: transparent; color: var(--primary-soft); border-color: var(--border); }
+    .btn.ghost:hover:not(:disabled) { background: var(--bg-alt); }
+    .btn.accent { background: var(--accent); color: var(--primary); }
+    .modal-bg {
+      display: none; position: fixed; inset: 0; background: rgba(16, 40, 32, 0.45);
+      z-index: 50; padding: 24px 16px; overflow: auto;
+    }
+    .modal-bg.open { display: grid; place-items: start center; }
+    .pedido {
+      background: #fff; color: var(--text); max-width: 720px; width: 100%;
+      border-radius: 16px; padding: 28px 32px; margin: 24px auto 40px;
+      box-shadow: 0 16px 48px rgba(10, 61, 46, 0.18);
+    }
+    .pedido h2 { font-size: 20px; font-weight: 800; margin: 0 0 4px; }
+    .pedido .sub { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
+    .pedido .aviso {
+      background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 10px;
+      padding: 10px 12px; font-size: 13px; margin: 0 0 18px; color: var(--text);
+    }
+    .pedido h3 { font-size: 14px; font-weight: 700; color: var(--primary); margin: 16px 0 8px; }
+    .pedido table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 0 0 8px; }
+    .pedido th, .pedido td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+    .pedido th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+    .pedido .assinaturas { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 28px 0 8px; }
+    .pedido label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .pedido input[type="text"], .pedido input[type="date"] {
+      width: 100%; border: 0; border-bottom: 1px solid var(--border); padding: 6px 0; font-size: 14px; background: transparent;
+    }
+    .pedido .linha { border-bottom: 1px solid var(--text); height: 36px; }
+    .pedido-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    #test-out { display: none; white-space: pre; font-family: ui-monospace, monospace; font-size: 12px;
+      background: #111; color: #d4f5c8; padding: 12px; border-radius: 8px; margin: 12px 0; }
+    #test-out.show { display: block; }
+    .rd-cards { display: none; }
+    .rd-card-unit {
+      display: grid; grid-template-columns: 1fr auto; gap: 2px 10px;
+      padding: 10px 10px; border-radius: 8px; margin-bottom: 6px;
+    }
+    .rd-card-unit.ok { background: var(--success-soft); }
+    .rd-card-unit.sobra { background: var(--accent-soft); }
+    .rd-card-unit.falta { background: var(--danger-soft); }
+    .rd-card-unit .cn { font-size: 14px; font-weight: 600; }
+    .rd-card-unit .meta { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+    .rd-card-unit .imp { grid-column: 1 / -1; font-size: 13px; font-weight: 600; color: var(--text); }
+    @media (max-width: 900px) {
+      .rd-plantas { grid-template-columns: 1fr; }
+      .rd-row { grid-template-columns: 28px minmax(0, 1fr) 28px 5.6rem; }
+      .rd-row .nm { grid-column: 1 / -1; }
+      .rd-table-wrap { display: none; }
+      .rd-cards { display: block; }
+      .pedido .assinaturas { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: #fff; }
+      .shell, .modal-bg { display: none !important; }
+      .pedido-print {
+        display: block !important; position: static; background: #fff;
+        box-shadow: none; max-width: none; padding: 0; margin: 0; border-radius: 0;
+      }
+      .pedido-actions { display: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -390,268 +484,72 @@
         </div>
 
 
-        <section class="section" id="arvore">
-          <h2>Para onde foi a energia</h2>
-          <p class="arvore-lead">Cada usina no alto, as casas que receberam embaixo. O traço mais grosso levou mais energia.</p>
-          <div class="arvore-desktop card">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 70 1400 920" width="100%" height="auto" role="img" aria-label="Árvore do rateio de novembro de 2026, com as duas usinas no alto e as casas que receberam embaixo">
-<style>text { font-family: Inter, 'Segoe UI', Roboto, sans-serif; }</style>
-<rect width="1400" height="990" fill="#F4F8F5"/>
-<rect width="1400" height="64" fill="#0A3D2E"/>
-<rect y="64" width="1400" height="6" fill="#F5B731"/>
-<g transform="translate(28,12) scale(1.15)">
-  <circle cx="18" cy="18" r="6" fill="#F5B731"/>
-  <g stroke="#F5B731" stroke-width="1.8" stroke-linecap="round" fill="none">
-    <path d="M18 4v4M18 28v4M4 18h4M28 18h4M8.3 8.3l2.8 2.8M24.9 24.9l2.8 2.8M8.3 27.7l2.8-2.8M24.9 11.1l2.8-2.8"/>
-  </g>
-</g>
-<text x="80.0" y="28.0" font-size="14" font-weight="800" fill="#F5B731" text-anchor="start" letter-spacing="2.4">SOLARTECH</text>
-<text x="80.0" y="52.0" font-size="26" font-weight="800" fill="#FFFFFF" text-anchor="start" >Para onde foi a energia — novembro/2026</text>
-<text x="1372.0" y="40.0" font-size="15" font-weight="700" fill="#F5B731" text-anchor="end" >Bandeira verde  ·  R$ 1,2250/kWh</text>
-<rect x="390.0" y="116.0" width="620.0" height="112.0" rx="16" ry="16" fill="#0A3D2E" stroke="none"/>
-<rect x="390.0" y="116.0" width="10" height="112" rx="16" fill="#F5B731"/>
-<rect x="398.0" y="116.0" width="8" height="112" fill="#0A3D2E"/>
-<g transform="translate(418.0,144) scale(1.55)">
-  <circle cx="18" cy="18" r="6" fill="#F5B731"/>
-  <g stroke="#F5B731" stroke-width="1.8" stroke-linecap="round" fill="none">
-    <path d="M18 4v4M18 28v4M4 18h4M28 18h4M8.3 8.3l2.8 2.8M24.9 24.9l2.8 2.8M8.3 27.7l2.8-2.8M24.9 11.1l2.8-2.8"/>
-  </g>
-</g>
-<text x="486.0" y="164.0" font-size="32" font-weight="800" fill="#FFFFFF" text-anchor="start" >Usina 15 kWp</text>
-<text x="486.0" y="198.0" font-size="20" font-weight="500" fill="#F5B731" text-anchor="start" >gerou 1.827 kWh   ·   dividiu 1.108 kWh</text>
-<path d="M 700.0,228.0 L 700.0,246.0" stroke="#1A6B52" stroke-width="14" stroke-linecap="round" fill="none"/>
-<path d="M 700.0,246.0 C 700.0,297.0 161.6,297.0 161.6,348.0" stroke="#1A6B52" stroke-width="31.0" fill="none" stroke-linecap="round"/>
-<path d="M 700.0,246.0 C 700.0,297.0 430.8,297.0 430.8,348.0" stroke="#1A6B52" stroke-width="11.0" fill="none" stroke-linecap="round"/>
-<path d="M 700.0,246.0 C 700.0,297.0 700.0,297.0 700.0,348.0" stroke="#1A6B52" stroke-width="11.0" fill="none" stroke-linecap="round"/>
-<path d="M 700.0,246.0 C 700.0,297.0 969.2,297.0 969.2,348.0" stroke="#1A6B52" stroke-width="11.0" fill="none" stroke-linecap="round"/>
-<path d="M 700.0,246.0 C 700.0,297.0 1238.4,297.0 1238.4,348.0" stroke="#1A6B52" stroke-width="11.0" fill="none" stroke-linecap="round"/>
-<rect x="203.4" y="302.9" width="122.4" height="24.0" rx="12" ry="12" fill="#FFFFFF" stroke="#1A6B52" stroke-width="1"/>
-<text x="264.6" y="319.9" font-size="14" font-weight="800" fill="#0A3D2E" text-anchor="middle" >60%  ·  664,8 kWh</text>
-<rect x="421.1" y="302.9" width="122.4" height="24.0" rx="12" ry="12" fill="#FFFFFF" stroke="#1A6B52" stroke-width="1"/>
-<text x="482.3" y="319.9" font-size="14" font-weight="800" fill="#0A3D2E" text-anchor="middle" >10%  ·  110,8 kWh</text>
-<rect x="638.8" y="302.9" width="122.4" height="24.0" rx="12" ry="12" fill="#FFFFFF" stroke="#1A6B52" stroke-width="1"/>
-<text x="700.0" y="319.9" font-size="14" font-weight="800" fill="#0A3D2E" text-anchor="middle" >10%  ·  110,8 kWh</text>
-<rect x="856.5" y="302.9" width="122.4" height="24.0" rx="12" ry="12" fill="#FFFFFF" stroke="#1A6B52" stroke-width="1"/>
-<text x="917.7" y="319.9" font-size="14" font-weight="800" fill="#0A3D2E" text-anchor="middle" >10%  ·  110,8 kWh</text>
-<rect x="1074.2" y="302.9" width="122.4" height="24.0" rx="12" ry="12" fill="#FFFFFF" stroke="#1A6B52" stroke-width="1"/>
-<text x="1135.4" y="319.9" font-size="14" font-weight="800" fill="#0A3D2E" text-anchor="middle" >10%  ·  110,8 kWh</text>
-<rect x="36.0" y="348.0" width="251.2" height="150.0" rx="14" ry="14" fill="#FFF4D6" stroke="#D4E3DA" stroke-width="1.2"/>
-<rect x="36.0" y="348.0" width="251.2" height="8" rx="14" fill="#F5B731"/>
-<rect x="36.0" y="354.0" width="251.2" height="4" fill="#F5B731"/>
-<circle cx="58.0" cy="380.0" r="8" fill="#FFD36A"/>
-<circle cx="58.0" cy="380.0" r="6.2" fill="#F0B000"/>
-<text x="72.0" y="386.0" font-size="20" font-weight="800" fill="#102820" text-anchor="start" >Adoniro</text>
-<text x="52.0" y="416.0" font-size="13" font-weight="700" fill="#B54708" text-anchor="start" >Sobrando crédito</text>
-<text x="52.0" y="440.0" font-size="14" font-weight="500" fill="#102820" text-anchor="start" >Saldo 4.053 kWh · já usou um pedaço</text>
-<rect x="305.2" y="348.0" width="251.2" height="150.0" rx="14" ry="14" fill="#FFF4D6" stroke="#D4E3DA" stroke-width="1.2"/>
-<rect x="305.2" y="348.0" width="251.2" height="8" rx="14" fill="#F5B731"/>
-<rect x="305.2" y="354.0" width="251.2" height="4" fill="#F5B731"/>
-<circle cx="327.2" cy="380.0" r="8" fill="#FFD36A"/>
-<circle cx="327.2" cy="380.0" r="6.2" fill="#F0B000"/>
-<text x="341.2" y="376.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Casa 01</text>
-<text x="341.2" y="396.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Individual</text>
-<text x="321.2" y="424.0" font-size="13" font-weight="700" fill="#B54708" text-anchor="start" >Sobrando crédito</text>
-<text x="321.2" y="448.0" font-size="14" font-weight="500" fill="#102820" text-anchor="start" >Sobra · 364 kWh guardados</text>
-<rect x="574.4" y="348.0" width="251.2" height="150.0" rx="14" ry="14" fill="#FFF4D6" stroke="#D4E3DA" stroke-width="1.2"/>
-<rect x="574.4" y="348.0" width="251.2" height="8" rx="14" fill="#F5B731"/>
-<rect x="574.4" y="354.0" width="251.2" height="4" fill="#F5B731"/>
-<circle cx="596.4" cy="380.0" r="8" fill="#FFD36A"/>
-<circle cx="596.4" cy="380.0" r="6.2" fill="#F0B000"/>
-<text x="610.4" y="376.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Casa 02</text>
-<text x="610.4" y="396.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Individual</text>
-<text x="590.4" y="424.0" font-size="13" font-weight="700" fill="#B54708" text-anchor="start" >Sobrando crédito</text>
-<text x="590.4" y="448.0" font-size="14" font-weight="500" fill="#102820" text-anchor="start" >Sobra · 191 kWh (uns 3 meses)</text>
-<rect x="843.6" y="348.0" width="251.2" height="150.0" rx="14" ry="14" fill="#FFF4D6" stroke="#D4E3DA" stroke-width="1.2"/>
-<rect x="843.6" y="348.0" width="251.2" height="8" rx="14" fill="#F5B731"/>
-<rect x="843.6" y="354.0" width="251.2" height="4" fill="#F5B731"/>
-<circle cx="865.6" cy="380.0" r="8" fill="#FFD36A"/>
-<circle cx="865.6" cy="380.0" r="6.2" fill="#F0B000"/>
-<text x="879.6" y="376.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Casa 03</text>
-<text x="879.6" y="396.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Individual</text>
-<text x="859.6" y="424.0" font-size="13" font-weight="700" fill="#B54708" text-anchor="start" >Sobrando crédito</text>
-<text x="859.6" y="448.0" font-size="14" font-weight="500" fill="#102820" text-anchor="start" >Sobra · 238 kWh (uns 11 meses)</text>
-<rect x="1112.8" y="348.0" width="251.2" height="150.0" rx="14" ry="14" fill="#FFF4D6" stroke="#D4E3DA" stroke-width="1.2"/>
-<rect x="1112.8" y="348.0" width="251.2" height="8" rx="14" fill="#F5B731"/>
-<rect x="1112.8" y="354.0" width="251.2" height="4" fill="#F5B731"/>
-<circle cx="1134.8" cy="380.0" r="8" fill="#FFD36A"/>
-<circle cx="1134.8" cy="380.0" r="6.2" fill="#F0B000"/>
-<text x="1148.8" y="376.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Casa 04</text>
-<text x="1148.8" y="396.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Individual</text>
-<text x="1128.8" y="424.0" font-size="13" font-weight="700" fill="#B54708" text-anchor="start" >Sobrando crédito</text>
-<text x="1128.8" y="448.0" font-size="14" font-weight="500" fill="#102820" text-anchor="start" >Sobra · 283 kWh (uns 10 meses)</text>
-<rect x="390.0" y="522.0" width="620.0" height="112.0" rx="16" ry="16" fill="#0A3D2E" stroke="none"/>
-<rect x="390.0" y="522.0" width="10" height="112" rx="16" fill="#F5B731"/>
-<rect x="398.0" y="522.0" width="8" height="112" fill="#0A3D2E"/>
-<g transform="translate(418.0,550) scale(1.55)">
-  <circle cx="18" cy="18" r="6" fill="#F5B731"/>
-  <g stroke="#F5B731" stroke-width="1.8" stroke-linecap="round" fill="none">
-    <path d="M18 4v4M18 28v4M4 18h4M28 18h4M8.3 8.3l2.8 2.8M24.9 24.9l2.8 2.8M8.3 27.7l2.8-2.8M24.9 11.1l2.8-2.8"/>
-  </g>
-</g>
-<text x="486.0" y="570.0" font-size="32" font-weight="800" fill="#FFFFFF" text-anchor="start" >Casa 01 Coletivo</text>
-<text x="486.0" y="604.0" font-size="20" font-weight="500" fill="#F5B731" text-anchor="start" >gerou 1.192 kWh   ·   dividiu 836 kWh</text>
-<path d="M 700.0,634.0 L 700.0,652.0" stroke="#1A6B52" stroke-width="14" stroke-linecap="round" fill="none"/>
-<path d="M 700.0,652.0 C 700.0,700.0 195.2,700.0 195.2,748.0" stroke="#1A6B52" stroke-width="14.5" fill="none" stroke-linecap="round"/>
-<path d="M 700.0,652.0 C 700.0,700.0 531.8,700.0 531.8,748.0" stroke="#1A6B52" stroke-width="14.5" fill="none" stroke-linecap="round"/>
-<path d="M 700.0,652.0 C 700.0,700.0 868.2,700.0 868.2,748.0" stroke="#1A6B52" stroke-width="14.5" fill="none" stroke-linecap="round"/>
-<path d="M 700.0,652.0 C 700.0,700.0 1204.8,700.0 1204.8,748.0" stroke="#1A6B52" stroke-width="14.5" fill="none" stroke-linecap="round"/>
-<rect x="232.8" y="704.9" width="118.0" height="24.0" rx="12" ry="12" fill="#FFFFFF" stroke="#1A6B52" stroke-width="1"/>
-<text x="291.8" y="721.9" font-size="14" font-weight="800" fill="#0A3D2E" text-anchor="middle" >25%  ·  209 kWh</text>
-<rect x="504.9" y="704.9" width="118.0" height="24.0" rx="12" ry="12" fill="#FFFFFF" stroke="#1A6B52" stroke-width="1"/>
-<text x="563.9" y="721.9" font-size="14" font-weight="800" fill="#0A3D2E" text-anchor="middle" >25%  ·  209 kWh</text>
-<rect x="777.1" y="704.9" width="118.0" height="24.0" rx="12" ry="12" fill="#FFFFFF" stroke="#1A6B52" stroke-width="1"/>
-<text x="836.1" y="721.9" font-size="14" font-weight="800" fill="#0A3D2E" text-anchor="middle" >25%  ·  209 kWh</text>
-<rect x="1049.2" y="704.9" width="118.0" height="24.0" rx="12" ry="12" fill="#FFFFFF" stroke="#1A6B52" stroke-width="1"/>
-<text x="1108.2" y="721.9" font-size="14" font-weight="800" fill="#0A3D2E" text-anchor="middle" >25%  ·  209 kWh</text>
-<rect x="36.0" y="748.0" width="318.5" height="150.0" rx="14" ry="14" fill="#FFF4D6" stroke="#D4E3DA" stroke-width="1.2"/>
-<rect x="36.0" y="748.0" width="318.5" height="8" rx="14" fill="#F5B731"/>
-<rect x="36.0" y="754.0" width="318.5" height="4" fill="#F5B731"/>
-<circle cx="58.0" cy="780.0" r="8" fill="#FFD36A"/>
-<circle cx="58.0" cy="780.0" r="6.2" fill="#F0B000"/>
-<text x="72.0" y="776.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Casa 02</text>
-<text x="72.0" y="796.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Coletivo</text>
-<text x="52.0" y="824.0" font-size="13" font-weight="700" fill="#B54708" text-anchor="start" >Sobrando crédito</text>
-<text x="52.0" y="848.0" font-size="14" font-weight="500" fill="#102820" text-anchor="start" >Sobra · 692 kWh guardados</text>
-<rect x="372.5" y="748.0" width="318.5" height="150.0" rx="14" ry="14" fill="#E3F4EA" stroke="#D4E3DA" stroke-width="1.2"/>
-<rect x="372.5" y="748.0" width="318.5" height="8" rx="14" fill="#1B7F4C"/>
-<rect x="372.5" y="754.0" width="318.5" height="4" fill="#1B7F4C"/>
-<circle cx="394.5" cy="780.0" r="8" fill="#7DCE6E"/>
-<circle cx="394.5" cy="780.0" r="6.2" fill="#3D9A3A"/>
-<text x="408.5" y="776.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Casa 03</text>
-<text x="408.5" y="796.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Coletivo</text>
-<text x="388.5" y="824.0" font-size="13" font-weight="700" fill="#1B7F4C" text-anchor="start" >Equilibrada</text>
-<text x="388.5" y="848.0" font-size="14" font-weight="500" fill="#102820" text-anchor="start" >Quase no ponto · usou 200 dos 209 kWh</text>
-<rect x="709.0" y="748.0" width="318.5" height="150.0" rx="14" ry="14" fill="#FFF4D6" stroke="#D4E3DA" stroke-width="1.2"/>
-<rect x="709.0" y="748.0" width="318.5" height="8" rx="14" fill="#F5B731"/>
-<rect x="709.0" y="754.0" width="318.5" height="4" fill="#F5B731"/>
-<circle cx="731.0" cy="780.0" r="8" fill="#FFD36A"/>
-<circle cx="731.0" cy="780.0" r="6.2" fill="#F0B000"/>
-<text x="745.0" y="776.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Casa 04</text>
-<text x="745.0" y="796.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Coletivo</text>
-<text x="725.0" y="824.0" font-size="13" font-weight="700" fill="#B54708" text-anchor="start" >Sobrando crédito</text>
-<text x="725.0" y="848.0" font-size="14" font-weight="500" fill="#102820" text-anchor="start" >Usou só 17 kWh · 209 kWh foram ao saldo</text>
-<rect x="1045.5" y="748.0" width="318.5" height="150.0" rx="14" ry="14" fill="#FFEBEE" stroke="#D4E3DA" stroke-width="1.2"/>
-<rect x="1045.5" y="748.0" width="318.5" height="8" rx="14" fill="#C62828"/>
-<rect x="1045.5" y="754.0" width="318.5" height="4" fill="#C62828"/>
-<circle cx="1067.5" cy="780.0" r="8" fill="#FF8A80"/>
-<circle cx="1067.5" cy="780.0" r="6.2" fill="#E53935"/>
-<text x="1081.5" y="776.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Casa 05</text>
-<text x="1081.5" y="796.0" font-size="18" font-weight="800" fill="#102820" text-anchor="start" >Coletivo</text>
-<text x="1061.5" y="824.0" font-size="13" font-weight="700" fill="#C62828" text-anchor="start" >Faltando</text>
-<text x="1061.5" y="848.0" font-size="14" font-weight="500" fill="#102820" text-anchor="start" >Faltou 536 kWh ≈ R$ 657</text>
-<rect x="36.0" y="926.0" width="1328.0" height="46.0" rx="12" ry="12" fill="#FFFFFF" stroke="#D4E3DA" stroke-width="1"/>
-<circle cx="64" cy="949" r="8" fill="#7DCE6E"/>
-<circle cx="64" cy="949" r="6.2" fill="#3D9A3A"/>
-<text x="78.0" y="954.0" font-size="15" font-weight="700" fill="#102820" text-anchor="start" >Equilibrada</text>
-<circle cx="198.2" cy="949" r="8" fill="#FFD36A"/>
-<circle cx="198.2" cy="949" r="6.2" fill="#F0B000"/>
-<text x="212.2" y="954.0" font-size="15" font-weight="700" fill="#102820" text-anchor="start" >Sobrando crédito</text>
-<circle cx="373.4" cy="949" r="8" fill="#FF8A80"/>
-<circle cx="373.4" cy="949" r="6.2" fill="#E53935"/>
-<text x="387.4" y="954.0" font-size="15" font-weight="700" fill="#102820" text-anchor="start" >Faltando</text>
-<path d="M 487.0,949 H 543.0" stroke="#1A6B52" stroke-width="14" stroke-linecap="round"/>
-<path d="M 557.0,949 H 593.0" stroke="#1A6B52" stroke-width="5" stroke-linecap="round"/>
-<text x="605.0" y="954.0" font-size="15" font-weight="600" fill="#5F7369" text-anchor="start" >O traço mais grosso levou mais energia</text>
-</svg>
+
+        <section class="section" id="redistribuir">
+          <h2>Redistribuir energia</h2>
+          <p class="rd-lead">Ajuste quanto cada casa recebe de cada usina. A soma de cada usina precisa dar 100%. A prévia mostra o efeito neste mês, com o consumo das faturas de novembro.</p>
+
+          <div class="rd-plantas" id="rd-plantas"></div>
+
+          <div class="card rd-preview">
+            <h3>Como ficaria neste mês</h3>
+            <p class="rd-tip">Necessidade = consumo menos o piso de 30 kWh (o que em geral ainda se paga, mesmo com crédito). Valor de referência: R$ 1,2250 por kWh, bandeira verde.</p>
+            <div class="rd-table-wrap">
+              <table class="rd-table" id="rd-preview">
+                <thead>
+                  <tr>
+                    <th>Unidade</th>
+                    <th class="num">Receberia</th>
+                    <th class="num">Necessidade</th>
+                    <th>Situação</th>
+                    <th class="num">Impacto</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="rd-cards" id="rd-preview-cards"></div>
           </div>
-          <div class="arvore-mobile">
-            <details class="arv-grupo" open>
-              <summary>
-                <svg width="30" height="30" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="6" fill="#F5B731"/><g stroke="#F5B731" stroke-width="1.8" stroke-linecap="round"><path d="M18 4v4M18 28v4M4 18h4M28 18h4M8.3 8.3l2.8 2.8M24.9 24.9l2.8 2.8M8.3 27.7l2.8-2.8M24.9 11.1l2.8-2.8"/></g></svg>
-                <span class="who"><strong>Usina 15 kWp</strong><em>gerou 1.827 kWh · dividiu 1.108 kWh</em></span>
-                <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-              </summary>
-              <ul class="arv-lista">
-          <li class="arv-filho">
-            <div class="arv-ramo-row"><div class="arv-ramo"><i style="width:100%"></i></div><span>60% · 664,8 kWh</span></div>
-            <div class="arv-card sobra">
-              <div class="nm"><span class="dot sobra"></span> Adoniro</div>
-              <div class="st">Sobrando crédito</div>
-              <p>Saldo 4.053 kWh · já usou um pedaço</p>
-            </div>
-          </li>
-          <li class="arv-filho">
-            <div class="arv-ramo-row"><div class="arv-ramo"><i style="width:17%"></i></div><span>10% · 110,8 kWh</span></div>
-            <div class="arv-card sobra">
-              <div class="nm"><span class="dot sobra"></span> Casa 01 Individual</div>
-              <div class="st">Sobrando crédito</div>
-              <p>Sobra · 364 kWh guardados</p>
-            </div>
-          </li>
-          <li class="arv-filho">
-            <div class="arv-ramo-row"><div class="arv-ramo"><i style="width:17%"></i></div><span>10% · 110,8 kWh</span></div>
-            <div class="arv-card sobra">
-              <div class="nm"><span class="dot sobra"></span> Casa 02 Individual</div>
-              <div class="st">Sobrando crédito</div>
-              <p>Sobra · 191 kWh (uns 3 meses)</p>
-            </div>
-          </li>
-          <li class="arv-filho">
-            <div class="arv-ramo-row"><div class="arv-ramo"><i style="width:17%"></i></div><span>10% · 110,8 kWh</span></div>
-            <div class="arv-card sobra">
-              <div class="nm"><span class="dot sobra"></span> Casa 03 Individual</div>
-              <div class="st">Sobrando crédito</div>
-              <p>Sobra · 238 kWh (uns 11 meses)</p>
-            </div>
-          </li>
-          <li class="arv-filho">
-            <div class="arv-ramo-row"><div class="arv-ramo"><i style="width:17%"></i></div><span>10% · 110,8 kWh</span></div>
-            <div class="arv-card sobra">
-              <div class="nm"><span class="dot sobra"></span> Casa 04 Individual</div>
-              <div class="st">Sobrando crédito</div>
-              <p>Sobra · 283 kWh (uns 10 meses)</p>
-            </div>
-          </li>
-              </ul>
-            </details>
-            <details class="arv-grupo" open>
-              <summary>
-                <svg width="30" height="30" viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="6" fill="#F5B731"/><g stroke="#F5B731" stroke-width="1.8" stroke-linecap="round"><path d="M18 4v4M18 28v4M4 18h4M28 18h4M8.3 8.3l2.8 2.8M24.9 24.9l2.8 2.8M8.3 27.7l2.8-2.8M24.9 11.1l2.8-2.8"/></g></svg>
-                <span class="who"><strong>Casa 01 Coletivo</strong><em>gerou 1.192 kWh · dividiu 836 kWh</em></span>
-                <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-              </summary>
-              <ul class="arv-lista">
-          <li class="arv-filho">
-            <div class="arv-ramo-row"><div class="arv-ramo"><i style="width:100%"></i></div><span>25% · 209 kWh</span></div>
-            <div class="arv-card sobra">
-              <div class="nm"><span class="dot sobra"></span> Casa 02 Coletivo</div>
-              <div class="st">Sobrando crédito</div>
-              <p>Sobra · 692 kWh guardados</p>
-            </div>
-          </li>
-          <li class="arv-filho">
-            <div class="arv-ramo-row"><div class="arv-ramo"><i style="width:100%"></i></div><span>25% · 209 kWh</span></div>
-            <div class="arv-card ok">
-              <div class="nm"><span class="dot ok"></span> Casa 03 Coletivo</div>
-              <div class="st">Equilibrada</div>
-              <p>Quase no ponto · usou 200 dos 209 kWh</p>
-            </div>
-          </li>
-          <li class="arv-filho">
-            <div class="arv-ramo-row"><div class="arv-ramo"><i style="width:100%"></i></div><span>25% · 209 kWh</span></div>
-            <div class="arv-card sobra">
-              <div class="nm"><span class="dot sobra"></span> Casa 04 Coletivo</div>
-              <div class="st">Sobrando crédito</div>
-              <p>Usou só 17 kWh · 209 kWh foram ao saldo</p>
-            </div>
-          </li>
-          <li class="arv-filho">
-            <div class="arv-ramo-row"><div class="arv-ramo"><i style="width:100%"></i></div><span>25% · 209 kWh</span></div>
-            <div class="arv-card falta">
-              <div class="nm"><span class="dot falta"></span> Casa 05 Coletivo</div>
-              <div class="st">Faltando</div>
-              <p>Faltou 536 kWh ≈ R$ 657</p>
-            </div>
-          </li>
-              </ul>
-            </details>
-            <div class="legend">
-              <span class="pill ok"><span class="dot ok"></span> Equilibrada</span>
-              <span class="pill sobra"><span class="dot sobra"></span> Sobrando crédito</span>
-              <span class="pill falta"><span class="dot falta"></span> Faltando</span>
-            </div>
+
+          <div class="rd-actions">
+            <button type="button" class="btn ghost" id="rd-atual">Voltar ao atual</button>
+            <button type="button" class="btn secondary" id="rd-sugestao">Usar sugestão</button>
+            <button type="button" class="btn accent" id="rd-pedido">Gerar pedido para a Equatorial</button>
           </div>
+          <div class="rd-after">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <div><strong>Depois do envio:</strong> o app confere na próxima fatura se a nova divisão foi aplicada.</div>
+          </div>
+          <pre id="test-out" hidden></pre>
         </section>
+
+        <div class="modal-bg" id="pedido-bg" role="dialog" aria-modal="true" aria-labelledby="pedido-titulo">
+          <div class="pedido" id="pedido-doc">
+            <h2 id="pedido-titulo">Solicitação de alteração de rateio (Lei 14.300)</h2>
+            <p class="sub">Geração compartilhada · novembro/2026 · Simulação SolarTech</p>
+            <p class="aviso"><strong>Simulação</strong> — o envio é feito pelo titular da usina na Agência Virtual Equatorial; a mudança vale em até 30 dias.</p>
+            <div id="pedido-corpo"></div>
+            <div class="assinaturas">
+              <div>
+                <label for="pedido-data">Data</label>
+                <input type="text" id="pedido-data" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off">
+              </div>
+              <div>
+                <label for="pedido-titular">Nome do titular</label>
+                <input type="text" id="pedido-titular" autocomplete="name" placeholder="">
+              </div>
+              <div style="grid-column: 1 / -1">
+                <label>Assinatura do titular</label>
+                <div class="linha" aria-hidden="true"></div>
+              </div>
+            </div>
+            <p class="rd-tip">Depois do envio: o app confere na próxima fatura se a nova divisão foi aplicada.</p>
+            <div class="pedido-actions">
+              <button type="button" class="btn accent" id="pedido-print">Imprimir / salvar PDF</button>
+              <button type="button" class="btn ghost" id="pedido-fechar">Fechar</button>
+            </div>
+          </div>
+        </div>
 
         <section class="section" id="resumo">
           <h2>Resumo do mês</h2>
@@ -803,7 +701,7 @@
                 <span class="n">3</span>
                 <div>
                   <div class="tag">Sugestão 3.</div>
-                  <p>Isto é só uma sugestão, com base neste mês. Se a mudança for pedida, ela só vale na conta seguinte. Vale olhar mais um ou dois meses antes de decidir.</p>
+                  <p>Isto é só uma sugestão, com base neste mês. Você pode testá-la em Redistribuir energia, no alto desta tela, e gerar o pedido para a Equatorial. A mudança, se pedida, vale em até 30 dias.</p>
                 </div>
               </li>
             </ol>
@@ -843,6 +741,239 @@
         shell.classList.remove("nav-open");
       });
     });
+
+    const PISO = 30;
+    const PRECO = 1.225;
+    const POOL = { g1: 1108, g2: 836 };
+    const UNITS = [
+      { id: "CC2", name: "Casa 02 Coletivo", cons: 139 },
+      { id: "CC3", name: "Casa 03 Coletivo", cons: 200 },
+      { id: "CC4", name: "Casa 04 Coletivo", cons: 17 },
+      { id: "CC5", name: "Casa 05 Coletivo", cons: 745 },
+      { id: "CI1", name: "Casa 01 Individual", cons: 36 },
+      { id: "CI2", name: "Casa 02 Individual", cons: 95 },
+      { id: "CI3", name: "Casa 03 Individual", cons: 51 },
+      { id: "CI4", name: "Casa 04 Individual", cons: 57 },
+      { id: "ADONIRO", name: "Adoniro", cons: 876 }
+    ];
+    const ATUAL = {
+      g1: { CC2: 0, CC3: 0, CC4: 0, CC5: 0, CI1: 10, CI2: 10, CI3: 10, CI4: 10, ADONIRO: 60 },
+      g2: { CC2: 25, CC3: 25, CC4: 25, CC5: 25, CI1: 0, CI2: 0, CI3: 0, CI4: 0, ADONIRO: 0 }
+    };
+    const SUGESTAO = {
+      g1: { CC2: 0, CC3: 0, CC4: 0, CC5: 32, CI1: 0, CI2: 8, CI3: 0, CI4: 0, ADONIRO: 60 },
+      g2: { CC2: 0, CC3: 20, CC4: 0, CC5: 80, CI1: 0, CI2: 0, CI3: 0, CI4: 0, ADONIRO: 0 }
+    };
+    const PLANTAS = [
+      { key: "g1", nome: "Usina 15 kWp", pool: 1108 },
+      { key: "g2", nome: "Casa 01 Coletivo", pool: 836 }
+    ];
+
+    const state = { g1: { ...ATUAL.g1 }, g2: { ...ATUAL.g2 } };
+
+    function br(n, d) {
+      return n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
+    }
+    function needOf(u) { return Math.max(0, u.cons - PISO); }
+    function sumOf(key) {
+      return UNITS.reduce((s, u) => s + (Number(state[key][u.id]) || 0), 0);
+    }
+    function receivedOf(id) {
+      return POOL.g1 * (state.g1[id] || 0) / 100 + POOL.g2 * (state.g2[id] || 0) / 100;
+    }
+    function situacao(rec, need) {
+      if (need === 0) {
+        return rec > 0
+          ? { cls: "sobra", icon: "🟡", word: "Sobrando crédito", rs: rec * PRECO, kind: "sobra" }
+          : { cls: "ok", icon: "🟢", word: "Equilibrada", rs: 0, kind: "ok" };
+      }
+      const diff = rec - need;
+      if (rec + 15 >= need && rec <= need + 50) {
+        return { cls: "ok", icon: "🟢", word: "Equilibrada", rs: 0, kind: "ok" };
+      }
+      if (rec < need) {
+        return { cls: "falta", icon: "🔴", word: "Faltando", rs: (need - rec) * PRECO, kind: "falta" };
+      }
+      return { cls: "sobra", icon: "🟡", word: "Sobrando crédito", rs: (rec - need) * PRECO, kind: "sobra" };
+    }
+    function impactoTxt(s) {
+      if (s.kind === "ok") return "—";
+      const v = "R$ " + br(s.rs, 2);
+      return s.kind === "falta" ? v + " a mais na conta" : v + " em crédito a mais";
+    }
+    function totalsOk() {
+      return Math.abs(sumOf("g1") - 100) < 0.05 && Math.abs(sumOf("g2") - 100) < 0.05;
+    }
+
+    function setPct(key, id, value) {
+      let v = Number(value);
+      if (!Number.isFinite(v)) v = 0;
+      v = Math.round(v);
+      if (v < 0) v = 0;
+      if (v > 100) v = 100;
+      state[key][id] = v;
+      const range = document.getElementById(`rng-${key}-${id}`);
+      const num = document.getElementById(`num-${key}-${id}`);
+      if (range) range.value = String(v);
+      if (num) num.value = String(v);
+      renderTotalsAndPreview();
+    }
+
+    function applyMap(map) {
+      state.g1 = { ...map.g1 };
+      state.g2 = { ...map.g2 };
+      UNITS.forEach((u) => {
+        ["g1", "g2"].forEach((key) => {
+          const v = state[key][u.id] || 0;
+          const range = document.getElementById(`rng-${key}-${u.id}`);
+          const num = document.getElementById(`num-${key}-${u.id}`);
+          if (range) range.value = String(v);
+          if (num) num.value = String(v);
+        });
+      });
+      renderTotalsAndPreview();
+    }
+
+    function renderPlantas() {
+      const root = document.getElementById("rd-plantas");
+      root.innerHTML = PLANTAS.map((p) => {
+        const rows = UNITS.map((u) => {
+          const v = state[p.key][u.id] || 0;
+          return `<div class="rd-row">
+            <div class="nm">${u.name}</div>
+            <button type="button" class="rd-step" data-k="${p.key}" data-id="${u.id}" data-d="-1" aria-label="Diminuir ${u.name}">−</button>
+            <input type="range" id="rng-${p.key}-${u.id}" min="0" max="100" step="1" value="${v}" data-k="${p.key}" data-id="${u.id}" aria-label="Percentual de ${u.name} na ${p.nome}">
+            <button type="button" class="rd-step" data-k="${p.key}" data-id="${u.id}" data-d="1" aria-label="Aumentar ${u.name}">+</button>
+            <div class="rd-pct">
+              <input type="number" id="num-${p.key}-${u.id}" min="0" max="100" step="1" value="${v}" inputmode="numeric" data-k="${p.key}" data-id="${u.id}" aria-label="Percentual numérico de ${u.name}">
+              <span class="pct">%</span>
+            </div>
+          </div>`;
+        }).join("");
+        return `<article class="card rd-planta" data-planta="${p.key}">
+          <header><strong>${p.nome}</strong><span>${br(p.pool, 0)} kWh para dividir</span></header>
+          <div class="rd-total ok" id="tot-${p.key}"></div>
+          <div class="rd-rows">${rows}</div>
+        </article>`;
+      }).join("");
+    }
+
+    function renderTotalsAndPreview() {
+      PLANTAS.forEach((p) => {
+        const s = sumOf(p.key);
+        const el = document.getElementById(`tot-${p.key}`);
+        const ok = Math.abs(s - 100) < 0.05;
+        el.className = "rd-total " + (ok ? "ok" : "bad");
+        el.textContent = ok
+          ? `Total ${br(s, 0)}% — pronto`
+          : `Total ${br(s, 0)}% — ajuste para 100% (${s < 100 ? "faltam " + br(100 - s, 0) : "passou " + br(s - 100, 0)}%)`;
+      });
+      const rows = UNITS.map((u) => {
+        const rec = receivedOf(u.id);
+        const need = needOf(u);
+        const st = situacao(rec, need);
+        return { u, rec, need, st };
+      });
+      const tb = document.querySelector("#rd-preview tbody");
+      tb.innerHTML = rows.map(({ u, rec, need, st }) => `<tr class="${st.cls}">
+          <td>${u.name}</td>
+          <td class="num">${br(rec, 1)} kWh</td>
+          <td class="num">${br(need, 0)} kWh</td>
+          <td><span class="pill ${st.cls}">${st.icon} ${st.word}</span></td>
+          <td class="num">${impactoTxt(st)}</td>
+        </tr>`).join("");
+      const cards = document.getElementById("rd-preview-cards");
+      cards.innerHTML = rows.map(({ u, rec, need, st }) => `<div class="rd-card-unit ${st.cls}">
+          <div class="cn">${u.name}</div>
+          <span class="pill ${st.cls}">${st.icon} ${st.word}</span>
+          <div class="meta">Receberia ${br(rec, 1)} kWh · necessidade ${br(need, 0)} kWh</div>
+          <div class="imp">${impactoTxt(st) === "—" ? "Sem impacto extra neste mês." : impactoTxt(st)}</div>
+        </div>`).join("");
+      document.getElementById("rd-pedido").disabled = !totalsOk();
+    }
+
+    function pedidoHTML() {
+      return PLANTAS.map((p) => {
+        const rows = UNITS.filter((u) => (state[p.key][u.id] || 0) > 0)
+          .map((u) => `<tr><td>${u.name}</td><td>${br(state[p.key][u.id], 0)}%</td><td>${br(p.pool * state[p.key][u.id] / 100, 1)} kWh</td></tr>`)
+          .join("");
+        return `<h3>${p.nome} — ${br(p.pool, 0)} kWh a ratear</h3>
+          <table><thead><tr><th>Unidade beneficiária</th><th>Percentual</th><th>Energia</th></tr></thead><tbody>${rows}</tbody></table>`;
+      }).join("");
+    }
+
+    function abrirPedido() {
+      if (!totalsOk()) return;
+      document.getElementById("pedido-corpo").innerHTML = pedidoHTML();
+      const data = document.getElementById("pedido-data");
+      if (!data.value) {
+        const d = new Date();
+        const iso = String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
+        data.value = iso;
+      }
+      document.getElementById("pedido-bg").classList.add("open");
+    }
+    function fecharPedido() {
+      document.getElementById("pedido-bg").classList.remove("open");
+    }
+
+    function bind() {
+      document.getElementById("rd-plantas").addEventListener("input", (e) => {
+        const t = e.target;
+        if (t.dataset && t.dataset.k && t.dataset.id) setPct(t.dataset.k, t.dataset.id, t.value);
+      });
+      document.getElementById("rd-plantas").addEventListener("click", (e) => {
+        const btn = e.target.closest(".rd-step");
+        if (!btn) return;
+        const cur = Number(state[btn.dataset.k][btn.dataset.id]) || 0;
+        setPct(btn.dataset.k, btn.dataset.id, cur + Number(btn.dataset.d));
+      });
+      document.getElementById("rd-atual").addEventListener("click", () => applyMap(ATUAL));
+      document.getElementById("rd-sugestao").addEventListener("click", () => applyMap(SUGESTAO));
+      document.getElementById("rd-pedido").addEventListener("click", abrirPedido);
+      document.getElementById("pedido-fechar").addEventListener("click", fecharPedido);
+      document.getElementById("pedido-bg").addEventListener("click", (e) => {
+        if (e.target.id === "pedido-bg") fecharPedido();
+      });
+      document.getElementById("pedido-print").addEventListener("click", () => {
+        document.getElementById("pedido-doc").classList.add("pedido-print");
+        window.print();
+        document.getElementById("pedido-doc").classList.remove("pedido-print");
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") fecharPedido();
+      });
+    }
+
+    function runTests() {
+      const logs = [];
+      const ok = (cond, msg) => logs.push((cond ? "PASS " : "FAIL ") + msg);
+      applyMap(ATUAL);
+      ok(sumOf("g1") === 100 && sumOf("g2") === 100, "atual soma 100% em cada usina");
+      ok(Math.abs(receivedOf("CC5") - 209) < 0.05, "atual CC5 recebe 209 kWh");
+      applyMap(SUGESTAO);
+      ok(state.g2.CC5 === 80 && state.g2.CC3 === 20, "sugestão G2: CC5 80%, CC3 20%");
+      ok(state.g1.ADONIRO === 60 && state.g1.CC5 === 32 && state.g1.CI2 === 8, "sugestão G1: Adoniro 60%, CC5 32%, CI2 8%");
+      ok(sumOf("g1") === 100 && sumOf("g2") === 100, "sugestão soma 100%");
+      const rec5 = receivedOf("CC5");
+      ok(Math.abs(rec5 - (1108 * 0.32 + 836 * 0.80)) < 0.05, "prévia CC5 = 32% da Usina + 80% da Casa 01");
+      setPct("g2", "CC5", 70);
+      ok(sumOf("g2") === 90, "total G2 vira 90% ao baixar CC5 para 70%");
+      ok(document.getElementById("tot-g2").classList.contains("bad"), "aviso vermelho quando a soma não é 100%");
+      ok(document.getElementById("rd-pedido").disabled, "pedido bloqueado se a soma não é 100%");
+      applyMap(SUGESTAO);
+      ok(!document.getElementById("rd-pedido").disabled, "pedido liberado com soma 100%");
+      const out = document.getElementById("test-out");
+      out.hidden = false;
+      out.classList.add("show");
+      out.textContent = logs.join("\n") + "\n" + (logs.every((l) => l.startsWith("PASS")) ? "ALL_PASS" : "HAS_FAIL");
+    }
+
+    renderPlantas();
+    bind();
+    renderTotalsAndPreview();
+    if (new URLSearchParams(location.search).has("test")) runTests();
+
   </script>
 </body>
 </html>
