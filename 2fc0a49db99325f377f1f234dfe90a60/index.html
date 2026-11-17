@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <!-- rev: redistribuir-2026-11-17 -->
+  <!-- rev: redistribuir-2026-11-17c -->
   <meta charset="UTF-8" />
   <meta name="robots" content="noindex,nofollow" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><circle cx=%2212%22 cy=%2212%22 r=%2210%22 fill=%22%230A3D2E%22/><circle cx=%2212%22 cy=%2212%22 r=%225%22 fill=%22%23F5B731%22/></svg>" />
@@ -261,7 +261,15 @@
     .rd-row input[type="number"]::-webkit-outer-spin-button,
     .rd-row input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .rd-row:last-child { border-bottom: 0; }
-    .rd-row .nm { font-size: 14px; font-weight: 600; line-height: 1.3; }
+    .rd-row .nm {
+      font-size: 14px; font-weight: 600; line-height: 1.3;
+      display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px;
+    }
+    .rd-pode {
+      display: none; margin-left: 0; font-size: 11px; font-weight: 600;
+      color: var(--muted); letter-spacing: 0.01em; white-space: nowrap;
+    }
+    .rd-row.is-zero .rd-pode { display: inline; }
     .rd-step {
       width: 28px; height: 28px; padding: 0; border: 1px solid var(--border); background: var(--surface);
       border-radius: 8px; color: var(--primary); font-size: 16px; line-height: 1; cursor: pointer;
@@ -333,10 +341,17 @@
     .pedido th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
     .pedido .assinaturas { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 28px 0 8px; }
     .pedido label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-    .pedido input[type="text"], .pedido input[type="date"] {
+    .pedido input[type="text"], .pedido input[type="date"], .pedido input[type="email"] {
       width: 100%; border: 0; border-bottom: 1px solid var(--border); padding: 6px 0; font-size: 14px; background: transparent;
     }
+    .pedido input.invalido { border-bottom-color: var(--danger); }
     .pedido .linha { border-bottom: 1px solid var(--text); height: 36px; }
+    .pedido .intro { font-size: 14px; line-height: 1.55; margin: 0 0 16px; }
+    .pedido .meta { font-size: 12px; color: var(--muted); margin: -4px 0 8px; }
+    .pedido tfoot th, .pedido tfoot td { font-weight: 700; border-bottom: 0; padding-top: 8px; text-transform: none; }
+    .pedido-help { font-size: 12px; color: var(--muted); margin: 6px 0 0; line-height: 1.45; }
+    .pedido-email-erro { font-size: 12px; color: var(--danger); margin: 4px 0 0; }
+    .pedido-fecha { font-size: 13px; margin: 18px 0 0; line-height: 1.5; }
     .pedido-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
     #test-out { display: none; white-space: pre; font-family: ui-monospace, monospace; font-size: 12px;
       background: #111; color: #d4f5c8; padding: 12px; border-radius: 8px; margin: 12px 0; }
@@ -487,7 +502,7 @@
 
         <section class="section" id="redistribuir">
           <h2>Redistribuir energia</h2>
-          <p class="rd-lead">Ajuste quanto cada casa recebe de cada usina. A soma de cada usina precisa dar 100%. A prévia mostra o efeito neste mês, com o consumo das faturas de novembro.</p>
+          <p class="rd-lead">Ajuste quanto cada casa recebe de cada usina. Qualquer unidade pode receber de qualquer usina — as que hoje estão em 0% também podem ser incluídas. A soma de cada usina precisa dar 100%, no limite da energia que ela dividiu. A prévia soma o que cada casa receberia das duas usinas.</p>
 
           <div class="rd-plantas" id="rd-plantas"></div>
 
@@ -525,24 +540,37 @@
 
         <div class="modal-bg" id="pedido-bg" role="dialog" aria-modal="true" aria-labelledby="pedido-titulo">
           <div class="pedido" id="pedido-doc">
-            <h2 id="pedido-titulo">Solicitação de alteração de rateio (Lei 14.300)</h2>
-            <p class="sub">Geração compartilhada · novembro/2026 · Simulação SolarTech</p>
-            <p class="aviso"><strong>Simulação</strong> — o envio é feito pelo titular da usina na Agência Virtual Equatorial; a mudança vale em até 30 dias.</p>
+            <h2 id="pedido-titulo">Solicitação de alteração de rateio (Lei nº 14.300/2022)</h2>
+            <p class="sub">Geração distribuída compartilhada · Equatorial Energia</p>
+            <p class="aviso"><strong>Simulação</strong> — o envio é feito pelo titular da usina na Agência Virtual Equatorial; a alteração passa a valer em até 30 dias. Este documento não substitui o pedido oficial e não deve ser encaminhado com dados de terceiros.</p>
+            <p class="intro">O titular abaixo identificado solicita à Equatorial Energia a alteração dos percentuais de rateio da energia injetada pelas unidades geradoras indicadas, nos termos da Lei nº 14.300, de 6 de janeiro de 2022, e da regulamentação aplicável da ANEEL. Os percentuais de cada usina somam 100%.</p>
             <div id="pedido-corpo"></div>
+            <h3>Dados do titular</h3>
             <div class="assinaturas">
+              <div>
+                <label for="pedido-titular">Nome do titular</label>
+                <input type="text" id="pedido-titular" autocomplete="off" placeholder="">
+              </div>
+              <div>
+                <label for="pedido-cpf">CPF ou CNPJ do titular</label>
+                <input type="text" id="pedido-cpf" autocomplete="off" placeholder="">
+              </div>
+              <div style="grid-column: 1 / -1">
+                <label for="pedido-email">E-mail do titular para contato</label>
+                <input type="email" id="pedido-email" autocomplete="off" spellcheck="false" value="" placeholder="">
+                <p class="pedido-help">Preencha com o e-mail do titular já cadastrado na Agência Virtual Equatorial. O campo permanece em branco até o preenchimento pelo titular.</p>
+                <p class="pedido-email-erro" id="pedido-email-erro" hidden>Verifique o formato do e-mail informado.</p>
+              </div>
               <div>
                 <label for="pedido-data">Data</label>
                 <input type="text" id="pedido-data" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off">
               </div>
               <div>
-                <label for="pedido-titular">Nome do titular</label>
-                <input type="text" id="pedido-titular" autocomplete="name" placeholder="">
-              </div>
-              <div style="grid-column: 1 / -1">
                 <label>Assinatura do titular</label>
                 <div class="linha" aria-hidden="true"></div>
               </div>
             </div>
+            <p class="pedido-fecha">Declaro que os percentuais acima somam 100% em cada unidade geradora e que os dados do titular serão preenchidos antes do envio na Agência Virtual Equatorial.</p>
             <p class="rd-tip">Depois do envio: o app confere na próxima fatura se a nova divisão foi aplicada.</p>
             <div class="pedido-actions">
               <button type="button" class="btn accent" id="pedido-print">Imprimir / salvar PDF</button>
@@ -839,8 +867,9 @@
       root.innerHTML = PLANTAS.map((p) => {
         const rows = UNITS.map((u) => {
           const v = state[p.key][u.id] || 0;
-          return `<div class="rd-row">
-            <div class="nm">${u.name}</div>
+          const zero = v === 0 ? " is-zero" : "";
+          return `<div class="rd-row${zero}" data-k="${p.key}" data-id="${u.id}">
+            <div class="nm">${u.name} <span class="rd-pode">pode receber</span></div>
             <button type="button" class="rd-step" data-k="${p.key}" data-id="${u.id}" data-d="-1" aria-label="Diminuir ${u.name}">−</button>
             <input type="range" id="rng-${p.key}-${u.id}" min="0" max="100" step="1" value="${v}" data-k="${p.key}" data-id="${u.id}" aria-label="Percentual de ${u.name} na ${p.nome}">
             <button type="button" class="rd-step" data-k="${p.key}" data-id="${u.id}" data-d="1" aria-label="Aumentar ${u.name}">+</button>
@@ -859,6 +888,12 @@
     }
 
     function renderTotalsAndPreview() {
+      PLANTAS.forEach((p) => {
+        UNITS.forEach((u) => {
+          const row = document.querySelector(`.rd-row[data-k="${p.key}"][data-id="${u.id}"]`);
+          if (row) row.classList.toggle("is-zero", (state[p.key][u.id] || 0) === 0);
+        });
+      });
       PLANTAS.forEach((p) => {
         const s = sumOf(p.key);
         const el = document.getElementById(`tot-${p.key}`);
@@ -894,12 +929,37 @@
 
     function pedidoHTML() {
       return PLANTAS.map((p) => {
-        const rows = UNITS.filter((u) => (state[p.key][u.id] || 0) > 0)
+        const aloc = UNITS.filter((u) => (state[p.key][u.id] || 0) > 0);
+        const rows = aloc
           .map((u) => `<tr><td>${u.name}</td><td>${br(state[p.key][u.id], 0)}%</td><td>${br(p.pool * state[p.key][u.id] / 100, 1)} kWh</td></tr>`)
           .join("");
-        return `<h3>${p.nome} — ${br(p.pool, 0)} kWh a ratear</h3>
-          <table><thead><tr><th>Unidade beneficiária</th><th>Percentual</th><th>Energia</th></tr></thead><tbody>${rows}</tbody></table>`;
+        const soma = aloc.reduce((s, u) => s + (state[p.key][u.id] || 0), 0);
+        const kwh = aloc.reduce((s, u) => s + p.pool * (state[p.key][u.id] || 0) / 100, 0);
+        return `<h3>${p.nome}</h3>
+          <p class="meta">Energia de referência deste pedido: ${br(p.pool, 0)} kWh (ciclo de novembro/2026).</p>
+          <table>
+            <thead><tr><th>Unidade beneficiária</th><th>Percentual do rateio</th><th>Energia correspondente</th></tr></thead>
+            <tbody>${rows}</tbody>
+            <tfoot><tr><th>Total</th><th>${br(soma, 0)}%</th><th>${br(kwh, 1)} kWh</th></tr></tfoot>
+          </table>`;
       }).join("");
+    }
+
+    function validarEmailTitular() {
+      const el = document.getElementById("pedido-email");
+      const err = document.getElementById("pedido-email-erro");
+      if (!el || !err) return true;
+      const v = (el.value || "").trim();
+      if (el.value !== v) el.value = v;
+      if (!v) {
+        err.hidden = true;
+        el.classList.remove("invalido");
+        return true;
+      }
+      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      err.hidden = ok;
+      el.classList.toggle("invalido", !ok);
+      return ok;
     }
 
     function abrirPedido() {
@@ -935,7 +995,13 @@
       document.getElementById("pedido-bg").addEventListener("click", (e) => {
         if (e.target.id === "pedido-bg") fecharPedido();
       });
+      document.getElementById("pedido-email").addEventListener("input", validarEmailTitular);
+      document.getElementById("pedido-email").addEventListener("blur", validarEmailTitular);
       document.getElementById("pedido-print").addEventListener("click", () => {
+        if (!validarEmailTitular()) {
+          document.getElementById("pedido-email").focus();
+          return;
+        }
         document.getElementById("pedido-doc").classList.add("pedido-print");
         window.print();
         document.getElementById("pedido-doc").classList.remove("pedido-print");
@@ -963,6 +1029,43 @@
       ok(document.getElementById("rd-pedido").disabled, "pedido bloqueado se a soma não é 100%");
       applyMap(SUGESTAO);
       ok(!document.getElementById("rd-pedido").disabled, "pedido liberado com soma 100%");
+
+      applyMap(ATUAL);
+      const ci1 = state.g1.CI1, ci2 = state.g1.CI2, ci3 = state.g1.CI3, ci4 = state.g1.CI4;
+      setPct("g1", "ADONIRO", 50);
+      ok(state.g1.ADONIRO === 50, "Adoniro da Usina 15 foi para 50%");
+      ok(state.g1.CC5 === 0, "Casa 05 permanece 0% até o usuário incluir (sem auto-rebalance)");
+      ok(state.g1.CI1 === ci1 && state.g1.CI2 === ci2 && state.g1.CI3 === ci3 && state.g1.CI4 === ci4, "as demais unidades da Usina 15 não foram alteradas");
+      ok(sumOf("g1") === 90, "total da Usina 15 fica em 90% para o usuário completar");
+      setPct("g1", "CC5", 10);
+      ok(state.g1.ADONIRO === 50 && state.g1.CC5 === 10, "Adoniro 50% e Casa 05 Coletivo 10% na Usina 15");
+      ok(sumOf("g1") === 100 && sumOf("g2") === 100, "totais voltam a 100% em cada usina");
+      const recMove = receivedOf("CC5");
+      const esperado = 1108 * 0.10 + 836 * 0.25;
+      ok(Math.abs(recMove - esperado) < 0.05, "prévia da Casa 05 soma as duas usinas (10% da Usina 15 + 25% da Casa 01)");
+      ok(!!document.getElementById("num-g1-CC5") && !!document.getElementById("rng-g1-CC5"), "Casa 05 Coletivo aparece e é ajustável na Usina 15 mesmo partindo de 0%");
+      ok(!!document.getElementById("num-g2-ADONIRO"), "Adoniro aparece na Casa 01 Coletivo (pode receber, ainda que em 0%)");
+      UNITS.forEach((u) => {
+        ok(!!document.getElementById("num-g1-" + u.id) && !!document.getElementById("num-g2-" + u.id), "unidade visível nas duas usinas: " + u.name);
+      });
+
+      const email = document.getElementById("pedido-email");
+      ok(!!email && email.value === "", "e-mail do titular começa vazio");
+      const html = document.documentElement.innerHTML;
+      ok(!/(?:[a-z0-9._%+-]+)@(?:gmail|hotmail|yahoo|outlook|equatorial|solartech)(?:\.\w+)+/i.test(html), "nenhum e-mail real ou de exemplo no documento");
+      email.value = "invalido";
+      ok(!validarEmailTitular() && !document.getElementById("pedido-email-erro").hidden, "e-mail inválido é recusado");
+      email.value = "a" + "@" + "b.co";
+      ok(validarEmailTitular(), "formato básico de e-mail é aceito");
+      email.value = "";
+      ok(validarEmailTitular(), "e-mail pode permanecer em branco para preenchimento do titular");
+      abrirPedido();
+      const corpo = document.getElementById("pedido-corpo").innerText;
+      ok(corpo.indexOf("Casa 05 Coletivo") >= 0 && corpo.indexOf("50%") >= 0 && corpo.indexOf("10%") >= 0, "pedido lista Adoniro 50% e Casa 05 10%");
+      ok(corpo.indexOf("100%") >= 0, "pedido informa total 100% por usina");
+      ok(document.getElementById("pedido-titular").value === "" && document.getElementById("pedido-cpf").value === "", "nome e CPF/CNPJ ficam em branco");
+      fecharPedido();
+
       const out = document.getElementById("test-out");
       out.hidden = false;
       out.classList.add("show");
