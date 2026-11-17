@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <!-- rev: redistribuir-2026-11-17d -->
+  <!-- rev: redistribuir-2026-11-17e -->
   <meta charset="UTF-8" />
   <meta name="robots" content="noindex,nofollow" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><circle cx=%2212%22 cy=%2212%22 r=%2210%22 fill=%22%230A3D2E%22/><circle cx=%2212%22 cy=%2212%22 r=%225%22 fill=%22%23F5B731%22/></svg>" />
@@ -1083,43 +1083,318 @@
         + "<p>No computador, na caixa de impressão escolha “Salvar como PDF”. No celular, use Baixar PDF.</p>"
         + "</div>"
       );
-      const boot = "<script>(" + String(bootImpressao) + ")(" + auto + ");<\/script>";
+      const pdfB64 = u8ToB64(montarPedidoPdfBytes(coletarPedidoModelo(campos)));
+      const boot = "<script>(" + String(bootImpressao) + ")(" + auto + ",\"" + pdfB64 + "\");<\/script>";
       return "<!DOCTYPE html><html lang=\"pt-BR\"><head><meta charset=\"UTF-8\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
         + "<title>Solicitação de alteração de rateio (Lei nº 14.300/2022)</title>"
         + "<style>" + pedidoFolhaCSS() + "</style></head><body>"
         + toolbar + pedidoFolhaHTML(campos) + boot + "</body></html>";
     }
-    function bootImpressao(autoprint) {
-      function load(cb) {
-        if (window.html2pdf) return cb();
-        var urls = [
-          "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js",
-          "https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"
-        ];
-        var i = 0;
-        var next = function () {
-          if (i >= urls.length) { cb(new Error("cdn")); return; }
-          var s = document.createElement("script");
-          s.src = urls[i++];
-          s.onload = function () { window.html2pdf ? cb() : next(); };
-          s.onerror = next;
-          document.head.appendChild(s);
-        };
-        next();
+
+    function coletarPedidoModelo(campos) {
+      campos = campos || pedidoCampos();
+      return {
+        campos: campos,
+        plantas: PLANTAS.map(function (p) {
+          const aloc = UNITS.filter(function (u) { return (state[p.key][u.id] || 0) > 0; }).map(function (u) {
+            return { name: u.name, pct: state[p.key][u.id], kwh: p.pool * state[p.key][u.id] / 100 };
+          });
+          return {
+            nome: p.nome,
+            pool: p.pool,
+            aloc: aloc,
+            soma: aloc.reduce(function (s, r) { return s + r.pct; }, 0),
+            kwh: aloc.reduce(function (s, r) { return s + r.kwh; }, 0)
+          };
+        })
+      };
+    }
+    function toWinAnsi(str) {
+      const map = {
+        "\u20AC": 0x80, "\u201A": 0x82, "\u0192": 0x83, "\u201E": 0x84, "\u2026": 0x85,
+        "\u2020": 0x86, "\u2021": 0x87, "\u02C6": 0x88, "\u2030": 0x89, "\u0160": 0x8A,
+        "\u2039": 0x8B, "\u0152": 0x8C, "\u017D": 0x8E, "\u2018": 0x91, "\u2019": 0x92,
+        "\u201C": 0x93, "\u201D": 0x94, "\u2022": 0x95, "\u2013": 0x96, "\u2014": 0x97,
+        "\u02DC": 0x98, "\u2122": 0x99, "\u0161": 0x9A, "\u203A": 0x9B, "\u0153": 0x9C,
+        "\u017E": 0x9E, "\u0178": 0x9F
+      };
+      let out = "";
+      const s = String(str == null ? "" : str);
+      for (let i = 0; i < s.length; i++) {
+        const c = s.charCodeAt(i);
+        if (c < 128) out += s.charAt(i);
+        else if (map[s.charAt(i)] != null) out += String.fromCharCode(map[s.charAt(i)]);
+        else if (c >= 0xA0 && c <= 0xFF) out += s.charAt(i);
+        else out += "?";
       }
-      function baixar() {
-        var el = document.getElementById("pedido-folha");
-        load(function (err) {
-          if (err || !window.html2pdf) { window.print(); return; }
-          window.html2pdf().set({
-            margin: [12, 12, 12, 12],
-            filename: "solicitacao-alteracao-rateio.pdf",
-            image: { type: "jpeg", quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-            pagebreak: { mode: ["css", "legacy"] }
-          }).from(el).save();
+      return out;
+    }
+    function pdfLit(str) {
+      return "(" + toWinAnsi(str).replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)") + ")";
+    }
+    const W_REG = {
+      " ":278,"!":278,"\"":355,"#":556,"$":556,"%":889,"&":667,"'":191,"(":333,")":333,"*":389,"+":584,
+      ",":278,"-":333,".":278,"/":278,"0":556,"1":556,"2":556,"3":556,"4":556,"5":556,"6":556,"7":556,
+      "8":556,"9":556,":":278,";":278,"<":584,"=":584,">":584,"?":556,"@":1015,"A":667,"B":667,"C":722,
+      "D":722,"E":667,"F":611,"G":778,"H":722,"I":278,"J":500,"K":667,"L":556,"M":833,"N":722,"O":778,
+      "P":667,"Q":778,"R":722,"S":667,"T":611,"U":722,"V":667,"W":944,"X":667,"Y":667,"Z":611,"[":278,
+      "\\":278,"]":278,"^":469,"_":556,"`":222,"a":556,"b":556,"c":500,"d":556,"e":556,"f":278,"g":556,
+      "h":556,"i":222,"j":222,"k":500,"l":222,"m":833,"n":556,"o":556,"p":556,"q":556,"r":333,"s":500,
+      "t":278,"u":556,"v":500,"w":722,"x":500,"y":500,"z":500,"{":334,"|":260,"}":334,"~":584,
+      "\u00A0":278,"\u00B0":400,"\u00BA":365,
+      "\u00C0":667,"\u00C1":667,"\u00C2":667,"\u00C3":667,"\u00C7":722,"\u00C9":667,"\u00CA":667,
+      "\u00CD":278,"\u00D3":778,"\u00D4":778,"\u00D5":778,"\u00DA":722,
+      "\u00E0":556,"\u00E1":556,"\u00E2":556,"\u00E3":556,"\u00E7":500,"\u00E8":556,"\u00E9":556,
+      "\u00EA":556,"\u00ED":278,"\u00F3":556,"\u00F4":556,"\u00F5":556,"\u00FA":556,"\u00FC":556
+    };
+    const W_BLD = {
+      " ":278,"!":333,"\"":474,"#":556,"$":556,"%":889,"&":722,"'":238,"(":333,")":333,"*":389,"+":584,
+      ",":278,"-":333,".":278,"/":278,"0":556,"1":556,"2":556,"3":556,"4":556,"5":556,"6":556,"7":556,
+      "8":556,"9":556,":":333,";":333,"<":584,"=":584,">":584,"?":611,"@":975,"A":722,"B":722,"C":722,
+      "D":722,"E":667,"F":611,"G":778,"H":722,"I":278,"J":556,"K":722,"L":611,"M":833,"N":722,"O":778,
+      "P":667,"Q":778,"R":722,"S":667,"T":611,"U":722,"V":667,"W":944,"X":667,"Y":667,"Z":611,"[":333,
+      "\\":278,"]":333,"^":584,"_":556,"`":333,"a":556,"b":611,"c":556,"d":611,"e":556,"f":333,"g":611,
+      "h":611,"i":278,"j":278,"k":556,"l":278,"m":889,"n":611,"o":611,"p":611,"q":611,"r":389,"s":556,
+      "t":333,"u":611,"v":556,"w":778,"x":556,"y":556,"z":500,"{":389,"|":280,"}":389,"~":584,
+      "\u00A0":278,"\u00B0":400,"\u00BA":365,
+      "\u00C0":722,"\u00C1":722,"\u00C2":722,"\u00C3":722,"\u00C7":722,"\u00C9":667,"\u00CA":667,
+      "\u00CD":278,"\u00D3":778,"\u00D4":778,"\u00D5":778,"\u00DA":722,
+      "\u00E0":556,"\u00E1":556,"\u00E2":556,"\u00E3":556,"\u00E7":556,"\u00E9":556,
+      "\u00EA":556,"\u00ED":278,"\u00F3":611,"\u00F4":611,"\u00F5":611,"\u00FA":611,"\u00FC":611
+    };
+    function widthOfPdf(str, bold, size) {
+      const tab = bold ? W_BLD : W_REG;
+      const ansi = toWinAnsi(str);
+      let w = 0;
+      for (let i = 0; i < ansi.length; i++) {
+        const ch = ansi.charAt(i);
+        w += (tab[ch] != null ? tab[ch] : 556);
+      }
+      return w * size / 1000;
+    }
+    function wrapPdfText(str, bold, size, maxW) {
+      const words = String(str).split(/\s+/);
+      const lines = [];
+      let cur = "";
+      for (let i = 0; i < words.length; i++) {
+        const tryLine = cur ? cur + " " + words[i] : words[i];
+        if (cur && widthOfPdf(tryLine, bold, size) > maxW) {
+          lines.push(cur);
+          cur = words[i];
+        } else cur = tryLine;
+      }
+      if (cur) lines.push(cur);
+      return lines.length ? lines : [""];
+    }
+    function montarPedidoPdfBytes(modelo) {
+      const pageW = 595.28, pageH = 841.89;
+      const ml = 40, mr = 40, mt = 42, mb = 48;
+      const cw = pageW - ml - mr;
+      const campos = modelo.campos || {};
+      const pages = [];
+      let cmds = [];
+      let y = pageH - mt;
+      function flush() { pages.push(cmds.join("")); cmds = []; y = pageH - mt; }
+      function ensure(h) { if (y - h < mb) flush(); }
+      function rgb(hex) {
+        const h = hex.replace("#", "");
+        return (parseInt(h.slice(0, 2), 16) / 255).toFixed(3) + " "
+          + (parseInt(h.slice(2, 4), 16) / 255).toFixed(3) + " "
+          + (parseInt(h.slice(4, 6), 16) / 255).toFixed(3);
+      }
+      function setFill(hex) { cmds.push(rgb(hex) + " rg\n"); }
+      function setStroke(hex) { cmds.push(rgb(hex) + " RG\n"); }
+      function rect(x, yy, w, h, fill, stroke, lw) {
+        if (lw != null) cmds.push(lw + " w\n");
+        if (fill) setFill(fill);
+        if (stroke) setStroke(stroke);
+        cmds.push(x.toFixed(2) + " " + yy.toFixed(2) + " " + w.toFixed(2) + " " + h.toFixed(2) + " re " + (fill && stroke ? "B" : fill ? "f" : "S") + "\n");
+      }
+      function text(str, x, yy, size, bold, color) {
+        cmds.push("BT /F" + (bold ? "2" : "1") + " " + size + " Tf " + rgb(color || "#102820") + " rg 1 0 0 1 " + x.toFixed(2) + " " + yy.toFixed(2) + " Tm " + pdfLit(str) + " Tj ET\n");
+      }
+      function para(str, size, bold, color, leading, gapAfter) {
+        const lines = wrapPdfText(str, bold, size, cw);
+        ensure(lines.length * leading + 2);
+        for (let i = 0; i < lines.length; i++) {
+          y -= leading;
+          text(lines[i], ml, y, size, bold, color);
+        }
+        if (gapAfter) y -= gapAfter;
+      }
+
+      para("Solicita\u00e7\u00e3o de altera\u00e7\u00e3o de rateio (Lei n\u00ba 14.300/2022)", 14, true, "#102820", 18, 2);
+      para("Gera\u00e7\u00e3o distribu\u00edda compartilhada \u00b7 Equatorial Energia", 9, false, "#444444", 12, 8);
+
+      const aviso = "Simula\u00e7\u00e3o \u2014 o envio \u00e9 feito pelo titular da usina na Ag\u00eancia Virtual Equatorial; a altera\u00e7\u00e3o passa a valer em at\u00e9 30 dias. Este documento n\u00e3o substitui o pedido oficial e n\u00e3o deve ser encaminhado com dados de terceiros.";
+      const avisoLines = wrapPdfText(aviso, false, 9, cw - 16);
+      const avisoH = avisoLines.length * 12 + 14;
+      ensure(avisoH + 8);
+      y -= avisoH;
+      rect(ml, y, cw, avisoH, "#fff8e6", "#c9a227", 0.8);
+      for (let i = 0; i < avisoLines.length; i++) {
+        text(avisoLines[i], ml + 8, y + avisoH - 14 - i * 12, 9, false, "#102820");
+      }
+      y -= 8;
+
+      para("O titular abaixo identificado solicita \u00e0 Equatorial Energia a altera\u00e7\u00e3o dos percentuais de rateio da energia injetada pelas unidades geradoras indicadas, nos termos da Lei n\u00ba 14.300, de 6 de janeiro de 2022, e da regulamenta\u00e7\u00e3o aplic\u00e1vel da ANEEL. Os percentuais de cada usina somam 100%.", 10, false, "#102820", 14, 8);
+
+      const colW = [cw * 0.52, cw * 0.22, cw * 0.26];
+      (modelo.plantas || []).forEach(function (p) {
+        const rowH = 16;
+        ensure(54 + (p.aloc.length + 2) * rowH);
+        y -= 16;
+        text(p.nome, ml, y, 11, true, "#0a3d2e");
+        y -= 13;
+        text("Energia de refer\u00eancia deste pedido: " + br(p.pool, 0) + " kWh (ciclo de novembro/2026).", ml, y, 9, false, "#555555");
+        y -= 8;
+        const headerH = 16;
+        y -= headerH;
+        rect(ml, y, cw, headerH, "#eef4f0", null);
+        const heads = ["Unidade benefici\u00e1ria", "Percentual do rateio", "Energia correspondente"];
+        let hx = ml + 6;
+        for (let i = 0; i < 3; i++) {
+          text(heads[i].toUpperCase(), hx, y + 4.5, 7.5, true, "#555555");
+          hx += colW[i];
+        }
+        p.aloc.forEach(function (r) {
+          y -= rowH;
+          rect(ml, y, cw, 0.4, "#c5c5c5", null);
+          const cells = [r.name, br(r.pct, 0) + "%", br(r.kwh, 1) + " kWh"];
+          let cx = ml + 6;
+          for (let i = 0; i < 3; i++) {
+            text(cells[i], cx, y + 4.5, 10, false, "#102820");
+            cx += colW[i];
+          }
         });
+        y -= rowH;
+        const totals = ["Total", br(p.soma, 0) + "%", br(p.kwh, 1) + " kWh"];
+        let tx = ml + 6;
+        for (let i = 0; i < 3; i++) {
+          text(totals[i], tx, y + 4.5, 10, true, "#102820");
+          tx += colW[i];
+        }
+        y -= 8;
+      });
+
+      ensure(150);
+      y -= 16;
+      text("Dados do titular", ml, y, 11, true, "#0a3d2e");
+      y -= 6;
+      function campo(label, value, x, width) {
+        text(label, x, y, 8, false, "#555555");
+        const lineY = y - 16;
+        const val = (value || "").trim();
+        if (val) text(val, x, lineY + 3, 10, false, "#102820");
+        rect(x, lineY, width, 0.7, "#222222", null);
+        return lineY;
+      }
+      y -= 12;
+      const gap = 16;
+      const col = (cw - gap) / 2;
+      campo("Nome do titular", campos.titular, ml, col);
+      campo("CPF ou CNPJ do titular", campos.cpf, ml + col + gap, col);
+      y -= 28;
+      campo("E-mail do titular para contato", campos.email, ml, cw);
+      y -= 22;
+      para("Preencha com o e-mail do titular j\u00e1 cadastrado na Ag\u00eancia Virtual Equatorial. O campo permanece em branco at\u00e9 o preenchimento pelo titular.", 8, false, "#555555", 11, 10);
+      y -= 4;
+      campo("Data", campos.data, ml, col);
+      campo("Assinatura do titular", "", ml + col + gap, col);
+      y -= 28;
+      para("Declaro que os percentuais acima somam 100% em cada unidade geradora e que os dados do titular ser\u00e3o preenchidos antes do envio na Ag\u00eancia Virtual Equatorial.", 10, false, "#102820", 13, 0);
+      flush();
+
+      // footer on each page
+      for (let p = 0; p < pages.length; p++) {
+        const label = "SolarTech \u00b7 simula\u00e7\u00e3o de pedido de rateio \u00b7 novembro/2026";
+        const folio = (p + 1) + " / " + pages.length;
+        const foot = "0.5 w " + rgb("#d4e3da") + " RG " + ml.toFixed(2) + " 28 m " + (pageW - mr).toFixed(2) + " 28 l S\n"
+          + "BT /F1 8 Tf " + rgb("#5f7369") + " rg 1 0 0 1 " + ml.toFixed(2) + " 16 Tm " + pdfLit(label) + " Tj ET\n"
+          + "BT /F1 8 Tf " + rgb("#5f7369") + " rg 1 0 0 1 " + (pageW - mr - widthOfPdf(folio, false, 8)).toFixed(2) + " 16 Tm " + pdfLit(folio) + " Tj ET\n";
+        pages[p] = pages[p] + foot;
+      }
+
+      function pdfDate() {
+        const d = new Date();
+        const z = -d.getTimezoneOffset();
+        const sign = z >= 0 ? "+" : "-";
+        const ah = String(Math.floor(Math.abs(z) / 60)).padStart(2, "0");
+        const am = String(Math.abs(z) % 60).padStart(2, "0");
+        function n(v, l) { return String(v).padStart(l, "0"); }
+        return "D:" + n(d.getFullYear(), 4) + n(d.getMonth() + 1, 2) + n(d.getDate(), 2) + n(d.getHours(), 2) + n(d.getMinutes(), 2) + n(d.getSeconds(), 2) + sign + ah + "'" + am + "'";
+      }
+      const title = "Solicita\u00e7\u00e3o de altera\u00e7\u00e3o de rateio (Lei n\u00ba 14.300/2022)";
+      const info = "<< /Title " + pdfLit(title) + " /Author (SolarTech) /Creator (SolarTech) /Producer (SolarTech simula\u00e7\u00e3o de rateio) /CreationDate (" + pdfDate() + ") >>";
+      const xmp = "<?xpacket begin=\"\ufeff\" id=\"W5M0MpCehiHzreSzNTczkc9d\"?>\n"
+        + "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\"><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"
+        + "<rdf:Description rdf:about=\"\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:xmp=\"http://ns.adobe.com/xap/1.0/\" xmlns:pdf=\"http://ns.adobe.com/pdf/1.3/\">"
+        + "<dc:title><rdf:Alt><rdf:li xml:lang=\"x-default\">" + title + "</rdf:li></rdf:Alt></dc:title>"
+        + "<dc:description><rdf:Alt><rdf:li xml:lang=\"x-default\">Documento de simula\u00e7\u00e3o SolarTech para pedido de altera\u00e7\u00e3o de rateio \u00e0 Equatorial Energia, nos termos da Lei n\u00ba 14.300, de 6 de janeiro de 2022. N\u00e3o substitui o pedido oficial na Ag\u00eancia Virtual Equatorial. A altera\u00e7\u00e3o, se pedida, passa a valer em at\u00e9 30 dias. Os percentuais de cada unidade geradora somam 100%.</rdf:li></rdf:Alt></dc:description>"
+        + "<dc:creator><rdf:Seq><rdf:li>SolarTech</rdf:li></rdf:Seq></dc:creator>"
+        + "<pdf:Producer>SolarTech</pdf:Producer><xmp:CreatorTool>SolarTech simula\u00e7\u00e3o de rateio</xmp:CreatorTool>"
+        + "</rdf:Description></rdf:RDF></x:xmpmeta>\n"
+        + (" ".repeat(3500))
+        + "<?xpacket end=\"w\"?>";
+
+      const nPages = pages.length;
+      const pageObjNums = [];
+      for (let i = 0; i < nPages; i++) pageObjNums.push(7 + i * 2);
+      const kids = pageObjNums.map(function (n) { return n + " 0 R"; }).join(" ");
+      const all = [];
+      all.push("<< /Type /Catalog /Pages 2 0 R /Metadata 6 0 R >>");
+      all.push("<< /Type /Pages /Kids [ " + kids + " ] /Count " + nPages + " >>");
+      all.push("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
+      all.push("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
+      all.push(info);
+      all.push("<< /Type /Metadata /Subtype /XML /Length " + xmp.length + " >>\nstream\n" + xmp + "\nendstream");
+      for (let i = 0; i < nPages; i++) {
+        all.push("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + pageW + " " + pageH + "] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents " + (pageObjNums[i] + 1) + " 0 R >>");
+        all.push("<< /Length " + pages[i].length + " >>\nstream\n" + pages[i] + "endstream");
+      }
+      let out = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+      const off = [0];
+      for (let i = 0; i < all.length; i++) {
+        off.push(out.length);
+        out += (i + 1) + " 0 obj\n" + all[i] + "\nendobj\n";
+      }
+      const xref = out.length;
+      let xrefTab = "xref\n0 " + (all.length + 1) + "\n0000000000 65535 f \n";
+      for (let i = 1; i <= all.length; i++) xrefTab += String(off[i]).padStart(10, "0") + " 00000 n \n";
+      out += xrefTab;
+      out += "trailer\n<< /Size " + (all.length + 1) + " /Root 1 0 R /Info 5 0 R >>\nstartxref\n" + xref + "\n%%EOF\n";
+      const u = new Uint8Array(out.length);
+      for (let i = 0; i < out.length; i++) u[i] = out.charCodeAt(i) & 255;
+      return u;
+    }
+    function u8ToB64(u8) {
+      let s = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < u8.length; i += chunk) s += String.fromCharCode.apply(null, u8.subarray(i, i + chunk));
+      return btoa(s);
+    }
+    function dispararDownloadPdf(bytes, filename) {
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename || "pedido-rateio-equatorial.pdf";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    }
+    function bootImpressao(autoprint, pdfB64) {
+      function baixar() {
+        if (!pdfB64) { window.print(); return; }
+        var bin = atob(pdfB64);
+        var u8 = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+        var blob = new Blob([u8], { type: "application/pdf" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "pedido-rateio-equatorial.pdf";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
       }
       var bi = document.getElementById("btn-imprimir");
       var bb = document.getElementById("btn-baixar");
@@ -1131,7 +1406,8 @@
         else window.addEventListener("load", go);
       }
     }
-    function prepararPrintRoot(campos) {
+
+        function prepararPrintRoot(campos) {
       const root = document.getElementById("print-root");
       root.hidden = false;
       root.innerHTML = '<style>' + pedidoFolhaCSS() + "</style>" + pedidoFolhaHTML(campos || pedidoCampos());
@@ -1157,46 +1433,17 @@
       try { w.focus(); } catch (err) {}
       return w;
     }
-    function carregarHtml2Pdf() {
-      if (window.html2pdf) return Promise.resolve(window.html2pdf);
-      const urls = [
-        "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js",
-        "https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"
-      ];
-      return new Promise(function (resolve, reject) {
-        const tryNext = function (i) {
-          if (i >= urls.length) return reject(new Error("Não foi possível carregar o gerador de PDF."));
-          const s = document.createElement("script");
-          s.src = urls[i];
-          s.onload = function () { window.html2pdf ? resolve(window.html2pdf) : tryNext(i + 1); };
-          s.onerror = function () { tryNext(i + 1); };
-          document.head.appendChild(s);
-        };
-        tryNext(0);
-      });
-    }
     function baixarPedidoPdf() {
       if (!validarEmailTitular()) {
         const email = document.getElementById("pedido-email");
         if (email) email.focus();
         return Promise.resolve(false);
       }
-      const campos = pedidoCampos();
-      const root = prepararPrintRoot(campos);
-      const el = root.querySelector("#pedido-folha") || root;
-      return carregarHtml2Pdf().then(function (html2pdf) {
-        return html2pdf().set({
-          margin: [12, 12, 12, 12],
-          filename: "solicitacao-alteracao-rateio.pdf",
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: ["css", "legacy"] }
-        }).from(el).save();
-      }).catch(function () {
-        abrirPaginaImpressao(true);
-      });
+      const bytes = montarPedidoPdfBytes(coletarPedidoModelo(pedidoCampos()));
+      dispararDownloadPdf(bytes, "pedido-rateio-equatorial.pdf");
+      return Promise.resolve(true);
     }
+
 
         function abrirPedido() {
       if (!totalsOk()) return;
@@ -1308,6 +1555,12 @@
       const pagina = pedidoPaginaCompleta(pedidoCampos(), { autoprint: false });
       ok(pagina.indexOf("<!DOCTYPE html>") === 0 && pagina.indexOf("@media print") >= 0, "a página avulsa de impressão é um HTML completo com CSS de print");
       ok(pagina.indexOf("class=\"shell\"") < 0 && pagina.indexOf("modal-bg") < 0, "a página avulsa não inclui o painel nem o modal");
+
+      const pdfBytes = montarPedidoPdfBytes(coletarPedidoModelo(pedidoCampos()));
+      const head = Array.from(pdfBytes.subarray(0, 8)).map(function (b) { return String.fromCharCode(b); }).join("");
+      ok(head.indexOf("%PDF-1") === 0 && pdfBytes.length > 10000, "PDF do botão Baixar é um arquivo válido e completo");
+      const pdfAscii = Array.from(pdfBytes).map(function (b) { return b >= 32 && b < 127 ? String.fromCharCode(b) : " "; }).join("");
+      ok(pdfAscii.indexOf("14.300") >= 0 && pdfAscii.indexOf("Equatorial") >= 0 && pdfAscii.indexOf("100%") >= 0, "PDF nativo contém o texto do pedido");
 
       const out = document.getElementById("test-out");
       out.hidden = false;
